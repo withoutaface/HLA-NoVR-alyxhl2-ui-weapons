@@ -1,3 +1,5 @@
+DoIncludeScript("bindings.lua", nil)
+
 local map = GetMapName()
 local class = thisEntity:GetClassname()
 local name = thisEntity:GetName()
@@ -120,6 +122,12 @@ elseif vlua.find(name, "_portaloo_seat") then
     else
         thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,2000,0))
     end
+elseif vlua.find(name, "_drawer_") then
+    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+        thisEntity:ApplyAbsVelocityImpulse(player:GetForwardVector() * 180)
+    else
+        thisEntity:ApplyAbsVelocityImpulse(-player:GetForwardVector() * 180)
+    end
 end
 
 if vlua.find(name, "_wooden_board") then
@@ -133,7 +141,7 @@ end
 
 ---------- a1_intro_world ----------
 
-if name == "microphone" or name == "call_button_prop" then
+if name == "microphone" or name == "call_button_prop" or model == "maps/a1_intro_world/entities/unnamed_205_2961_1020.vmdl" then
     SendToConsole("ent_fire call_button_relay trigger")
 end
 
@@ -183,12 +191,6 @@ if vlua.find(name, "mailbox") and vlua.find(model, "door") then
     else
         thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,2500))
     end
-end
-
-if name == "balcony_ladder" then
-    ClimbLadderSound()
-    SendToConsole("fadein 0.2")
-    SendToConsole("setpos_exact -1296 576 67")
 end
 
 if name == "russell_entry_window" then
@@ -264,7 +266,7 @@ if name == "combine_gun_mechanical" and thisEntity:Attribute_GetIntValue("used",
     SendToConsole("ent_fire combine_gun_interact Alpha 0")
     SendToConsole("ent_fire combine_gun_mechanical SetParent !player")
     thisEntity:SetAngles(angles.x - 15, angles.y, angles.z)
-    SendToConsole("bind MOUSE1 \"ent_fire relay_shoot_gun trigger\"")
+    SendToConsole("bind " .. PRIMARY_ATTACK .. " \"ent_fire relay_shoot_gun trigger\"")
     SendToConsole("r_drawviewmodel 0")
     thisEntity:Attribute_SetIntValue("used", 1)
 end
@@ -686,7 +688,7 @@ if map == "a2_headcrabs_tunnel" then
 
     if name == "flashlight" then
         SendToConsole("ent_fire_output flashlight OnAttachedToHand")
-        SendToConsole("bind F inv_flashlight")
+        SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
         player:Attribute_SetIntValue("has_flashlight", 1)
         SendToConsole("ent_remove flashlight")
     end
@@ -868,6 +870,7 @@ elseif class == "item_hlvr_clip_energygun" then
     if name == "pistol_clip_1" then
         SendToConsole("ent_remove weapon_bugbait")
         SendToConsole("give weapon_pistol")
+        SendToConsole("ent_fire_output ammo_insert_listener OnEventFired")
     else
         SendToConsole("hlvr_addresources 10 0 0 0")
     end
@@ -902,7 +905,7 @@ elseif class == "item_hlvr_grenade_frag" then
     end
 elseif class == "item_healthvial" then
     if player:GetHealth() < player:GetMaxHealth() then
-        player:SetHealth(min(player:GetHealth() + 10, player:GetMaxHealth()))
+        player:SetHealth(min(player:GetHealth() + cvar_getf("hlvr_health_vial_amount"), player:GetMaxHealth()))
         FireGameEvent("item_pickup", item_pickup_params)
         StartSoundEventFromPosition("HealthPen.Stab", player:EyePosition())
         StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
@@ -910,3 +913,4 @@ elseif class == "item_healthvial" then
         thisEntity:Kill()
     end
 end
+--]]
