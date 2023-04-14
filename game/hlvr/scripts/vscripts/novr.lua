@@ -1,4 +1,5 @@
 if GlobalSys:CommandLineCheck("-novr") then
+    DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
 
@@ -233,7 +234,7 @@ if GlobalSys:CommandLineCheck("-novr") then
         local ent = SpawnEntityFromTableSynchronous("env_explosion", {["origin"]="886 -4111.625 -1188.75", ["explosion_type"]="custom", ["explosion_custom_effect"]="particles/vortigaunt_fx/vort_beam_explosion_i_big.vpcf"})
         DoEntFireByInstanceHandle(ent, "Explode", "", 0, nil, nil)
         StartSoundEventFromPosition("VortMagic.Throw", Vector(886, -4111.625, -1188.75))
-        SendToConsole("bind MOUSE1 \"\"")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " \"\"")
         SendToConsole("ent_fire relay_advisor_dead Trigger")
     end, "", 0)
 
@@ -274,10 +275,10 @@ if GlobalSys:CommandLineCheck("-novr") then
             end
 
             if GetMapName() == "a4_c17_water_tower" then
-                if vlua.find(Entities:FindAllInSphere(Vector(3314, 6048, 64), 20), player) then
-                    ClimbLadderSound()
-                    SendToConsole("fadein 0.2")
-                    SendToConsole("setpos 3276 6048 142")
+                if vlua.find(Entities:FindAllInSphere(Vector(3314, 6048, 64), 10), player) then
+                    ClimbLadder(142)
+                elseif vlua.find(Entities:FindAllInSphere(Vector(2981, 5879, -303), 10), player) then
+                    ClimbLadder(-57)
                 elseif vlua.find(Entities:FindAllInSphere(Vector(2374, 6207, -177), 20), player) then
                     ClimbLadderSound()
                     SendToConsole("fadein 0.2")
@@ -412,18 +413,20 @@ if GlobalSys:CommandLineCheck("-novr") then
             end
 
             if GetMapName() == "a1_intro_world" then
-                if vlua.find(Entities:FindAllInSphere(Vector(648,-1758,-141), 20), player) then
-                    ClimbLadderSound()
-                    SendToConsole("fadein 0.2")
-                    SendToConsole("setpos_exact 606 -1752 -70")
-                end
-
-                if vlua.find(Entities:FindAllInSphere(Vector(530,-2331,-84), 20), player) then
+                if vlua.find(Entities:FindAllInSphere(Vector(648,-1757,-141), 10), player) then
+                    ClimbLadder(-64)
+                elseif vlua.find(Entities:FindAllInSphere(Vector(530,-2331,-84), 20), player) then
                     ClimbLadderSound()
                     SendToConsole("fadein 0.2")
                     SendToConsole("setpos_exact 574 -2328 -130")
                     SendToConsole("ent_fire 563_vent_door DisablePickup")
                     SendToConsole("-use")
+                end
+            end
+
+            if GetMapName() == "a1_intro_world_2" then
+                if vlua.find(Entities:FindAllInSphere(Vector(-1268, 573, -63), 10), player) then
+                    ClimbLadder(80)
                 end
             end
         end
@@ -444,11 +447,14 @@ if GlobalSys:CommandLineCheck("-novr") then
             SpawnEntityFromTableSynchronous("player_speedmod", nil)
         end
 
+        SendToConsole("mouse_pitchyaw_sensitivity " .. MOUSE_SENSITIVITY)
+
         if GetMapName() == "startup" then
             SendToConsole("sv_cheats 1")
+            SendToConsole("addon_enable NoVRMapEdits")
             SendToConsole("hidehud 96")
             SendToConsole("mouse_disableinput 1")
-            SendToConsole("bind MOUSE1 +use")
+            SendToConsole("bind " .. PRIMARY_ATTACK .. " +use")
             if not loading_save_file then
                 SendToConsole("ent_fire player_speedmod ModifySpeed 0")
                 SendToConsole("setpos 0 -6154 6.473839")
@@ -462,16 +468,19 @@ if GlobalSys:CommandLineCheck("-novr") then
             ent:RedirectOutput("OnTrigger", "GoToMainMenu", ent)
         else
             SendToConsole("binddefaults")
-            SendToConsole("bind space jumpfixed")
-            SendToConsole("bind e \"+use;useextra\"")
-            SendToConsole("bind v noclip")
+            SendToConsole("bind " .. JUMP .. " jumpfixed")
+            SendToConsole("bind " .. INTERACT .. " \"+use;useextra\"")
+            SendToConsole("bind " .. NOCLIP .. " noclip")
+            SendToConsole("bind " .. QUICK_SAVE .. " \"save quick;play sounds/ui/beepclear.vsnd;ent_fire text_quicksave showmessage\"")
+            SendToConsole("bind " .. QUICK_LOAD .. " \"load quick\"")
+            SendToConsole("bind " .. MAIN_MENU .. " \"map startup;save exit\"")
+            SendToConsole("bind " .. PRIMARY_ATTACK .. " +iv_attack")
+            SendToConsole("bind " .. SECONDARY_ATTACK .. " +customattack2")
+            SendToConsole("bind " .. TERTIARY_ATTACK .. " +customattack3")
+            SendToConsole("bind " .. COVER_MOUTH .. " +covermouth")
+            print(COVER_MOUTH)
             SendToConsole("hl2_sprintspeed 140")
             SendToConsole("hl2_normspeed 140")
-            SendToConsole("bind F5 \"save quick;play sounds/ui/beepclear.vsnd;ent_fire text_quicksave showmessage\"")
-            SendToConsole("bind F9 \"load quick\"")
-            SendToConsole("bind M \"map startup;save exit\"")
-            SendToConsole("bind MOUSE2 +customattack2")
-            SendToConsole("bind MOUSE3 +customattack3")
             SendToConsole("r_drawviewmodel 0")
             SendToConsole("fov_desired 90")
             SendToConsole("sv_infinite_aux_power 1")
@@ -487,6 +496,7 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("ent_fire *_mailbox_*_door_* DisablePickup")
             SendToConsole("ent_fire *_dumpster_lid DisablePickup")
             SendToConsole("ent_fire *_portaloo_seat DisablePickup")
+            SendToConsole("ent_fire *_drawer_* DisablePickup")
             SendToConsole("ent_remove player_flashlight")
             SendToConsole("hl_headcrab_deliberate_miss_chance 0")
             SendToConsole("headcrab_powered_ragdoll 0")
@@ -503,7 +513,6 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("sk_plr_dmg_pistol 7")
             SendToConsole("sk_plr_dmg_ar2 9")
             SendToConsole("sk_plr_dmg_smg1 5")
-            SendToConsole("bind h +covermouth")
             SendToConsole("player_use_radius 60")
             SendToConsole("hlvr_physcannon_forward_offset 0")
             -- TODO: Lower this when picking up very low mass objects
@@ -529,6 +538,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                     "models/industrial/industrial_board_06.vmdl",
                     "models/industrial/industrial_board_07.vmdl",
                     "models/industrial/industrial_chemical_barrel_02.vmdl",
+                    "models/props_junk/wood_crate001a.vmdl",
+                    "models/props_junk/wood_crate002a.vmdl",
                 }
                 ent = Entities:FindByClassname(nil, "prop_physics")
                 while ent do
@@ -584,7 +595,7 @@ if GlobalSys:CommandLineCheck("-novr") then
                     SendToConsole("mouse_disableinput 1")
                     SendToConsole("give weapon_bugbait")
                     SendToConsole("hidehud 4")
-                    SendToConsole("bind h \"\"")
+                    SendToConsole("bind " .. COVER_MOUTH .. " \"\"")
 
                     ent = Entities:FindByName(nil, "relay_start_intro_text")
                     ent:RedirectOutput("OnTrigger", "DisableUICursor", ent)
@@ -599,6 +610,9 @@ if GlobalSys:CommandLineCheck("-novr") then
                     ent:SetAngles(180,angles.y,angles.z)
                     ent:SetOrigin(ent:GetOrigin() + Vector(0,0,10))
 
+                    ent = Entities:FindByName(nil, "relay_heist_monitors_callincoming")
+                    ent:RedirectOutput("OnTrigger", "ShowInteractTutorial", ent)
+
                     ent = Entities:FindByName(nil, "51_ladder_hint_trigger")
                     ent:RedirectOutput("OnTrigger", "ShowLadderTutorial", ent)
                 else
@@ -612,13 +626,32 @@ if GlobalSys:CommandLineCheck("-novr") then
                     SendToConsole("ent_create env_message { targetname text_sprint message SPRINT }")
                 end
 
-                SendToConsole("give weapon_bugbait")
-                SendToConsole("hidehud 96")
+                ent = Entities:GetLocalPlayer()
+                if ent:Attribute_GetIntValue("pistol", 0) == 0 then
+                    if ent:Attribute_GetIntValue("gravity_gloves", 0) == 0 then
+                        SendToConsole("hidehud 96")
+                    else
+                        SendToConsole("hidehud 0")
+                        ent:SetThink(function()
+                            SendToConsole("hidehud 1")
+                        end, "", 0)
+                    end
+                    SendToConsole("give weapon_bugbait")
+                else
+                    SendToConsole("r_drawviewmodel 1")
+                end
+
                 SendToConsole("combine_grenade_timer 7")
 
                 if not loading_save_file then
                     ent = Entities:FindByName(nil, "trigger_post_gate")
                     ent:RedirectOutput("OnTrigger", "ShowSprintTutorial", ent)
+
+                    ent = Entities:FindByName(nil, "gate_ammo_trigger")
+                    local origin = ent:GetOrigin()
+                    local angles = ent:GetAngles()
+                    ent = SpawnEntityFromTableSynchronous("trigger_detect_bullet_fire", {["model"]="maps/a1_intro_world_2/entities/gate_ammo_trigger_621_2249_345.vmdl", ["origin"]= origin.x .. " " .. origin.y .. " " .. origin.z, ["angles"]= angles.x .. " " .. angles.y .. " " .. angles.z})
+                    ent:RedirectOutput("OnDetectedBulletFire", "CheckTutorialPistolEmpty", ent)
                 end
 
                 ent = Entities:FindByName(nil, "scavenge_trigger")
@@ -653,10 +686,10 @@ if GlobalSys:CommandLineCheck("-novr") then
 
                     ent = Entities:GetLocalPlayer()
                     if ent:Attribute_GetIntValue("has_flashlight", 0) == 1 then
-                        SendToConsole("bind F inv_flashlight")
+                        SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
                     end
                 elseif GetMapName() ~= "a2_hideout" then
-                    SendToConsole("bind F inv_flashlight")
+                    SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
                     SendToConsole("give weapon_shotgun")
 
                     if GetMapName() == "a2_drainage" then
@@ -780,7 +813,7 @@ if GlobalSys:CommandLineCheck("-novr") then
                         elseif GetMapName() == "a5_ending" then
                             SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_ar2")
                             SendToConsole("r_drawviewmodel 0")
-                            SendToConsole("bind F \"\"")
+                            SendToConsole("bind " .. FLASHLIGHT .. " \"\"")
 
                             ent = Entities:FindByName(nil, "relay_advisor_void")
                             ent:RedirectOutput("OnTrigger", "GiveAdvisorVortEnergy", ent)
@@ -808,7 +841,7 @@ if GlobalSys:CommandLineCheck("-novr") then
         SendToConsole("mouse_disableinput 0")
         SendToConsole("ent_fire player_speedmod ModifySpeed 1")
         SendToConsole("hidehud 96")
-        SendToConsole("bind h +covermouth")
+        SendToConsole("bind " .. COVER_MOUTH .. " +covermouth")
     end
 
     function DisableUICursor(a, b)
@@ -831,10 +864,11 @@ if GlobalSys:CommandLineCheck("-novr") then
     end
 
     function EquipPistol(a, b)
-        SendToConsole("ent_fire_output weapon_equip_listener oneventfired")
+        SendToConsole("ent_fire_output weapon_equip_listener OnEventFired")
         SendToConsole("hidehud 64")
         SendToConsole("r_drawviewmodel 1")
         SendToConsole("ent_fire item_hlvr_weapon_energygun kill")
+        Entities:GetLocalPlayer():Attribute_SetIntValue("pistol", 1)
     end
 
     function MakeLeverUsable(a, b)
@@ -852,7 +886,7 @@ if GlobalSys:CommandLineCheck("-novr") then
         local ticks = 0
         ent:SetThink(function()
             if ent:GetOrigin().z > height then
-                ent:SetVelocity(Vector(ent:GetForwardVector().x, ent:GetForwardVector().y, 0):Normalized() * 100)
+                ent:SetVelocity(Vector(ent:GetForwardVector().x, ent:GetForwardVector().y, 0):Normalized() * 150)
             else
                 ent:SetVelocity(Vector(0, 0, 0))
                 ent:SetOrigin(ent:GetOrigin() + Vector(0, 0, 2))
@@ -886,9 +920,23 @@ if GlobalSys:CommandLineCheck("-novr") then
         SendToConsole("ent_fire 11478_6233_math_count_wheel_installment SetHitMax 1")
     end
 
+    function ShowInteractTutorial()
+        ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="INTERACT"})
+        DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
+        SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+
     function ShowLadderTutorial()
         SendToConsole("ent_fire text_ladder ShowMessage")
         SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+
+    function CheckTutorialPistolEmpty()
+        local player = Entities:GetLocalPlayer()
+        player:Attribute_SetIntValue("pistol_magazine_ammo", player:Attribute_GetIntValue("pistol_magazine_ammo", 0) - 1)
+        if player:Attribute_GetIntValue("pistol_magazine_ammo", 0) % 10 == 0 then
+            SendToConsole("ent_fire_output pistol_chambered_listener OnEventFired")
+        end
     end
 
     function ShowSprintTutorial()
@@ -904,7 +952,7 @@ if GlobalSys:CommandLineCheck("-novr") then
     function UnequipCombinGunMechanical()
         SendToConsole("ent_fire player_speedmod ModifySpeed 1")
         SendToConsole("ent_fire combine_gun_mechanical ClearParent")
-        SendToConsole("bind MOUSE1 +attack")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " +attack")
         local ent = Entities:FindByName(nil, "combine_gun_mechanical")
         SendToConsole("ent_setpos " .. ent:entindex() .. " 1479.722 385.634 964.917")
         SendToConsole("r_drawviewmodel 1")
@@ -923,19 +971,19 @@ if GlobalSys:CommandLineCheck("-novr") then
     end
 
     function GiveVortEnergy(a, b)
-        SendToConsole("bind MOUSE1 shootvortenergy")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " shootvortenergy")
         SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_ar2;ent_remove weapon_frag")
         SendToConsole("r_drawviewmodel 0")
     end
 
     function RemoveVortEnergy(a, b)
-        SendToConsole("bind MOUSE1 +attack")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " +attack")
         SendToConsole("r_drawviewmodel 1")
         SendToConsole("give weapon_frag")
     end
 
     function GiveAdvisorVortEnergy(a, b)
-        SendToConsole("bind MOUSE1 shootadvisorvortenergy")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " shootadvisorvortenergy")
     end
 
     function StartCredits(a, b)
