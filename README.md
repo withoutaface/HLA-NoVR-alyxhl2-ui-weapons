@@ -11,6 +11,8 @@ In the release section you can find a standalone addon package. Unzip it, back u
 
 ![Alt text](image/font_alyxhl2.png "Preview image font")
 
+[Video](https://youtu.be/smotVBQMiDs)
+
 ## Installation
 Copy the ``game`` folder into your main Half-Life: Alyx installation folder (e.g. ``C:\Program Files (x86)\Steam\steamapps\common\Half-Life Alyx``).
 
