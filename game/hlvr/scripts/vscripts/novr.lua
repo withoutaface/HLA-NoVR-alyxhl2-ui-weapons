@@ -429,6 +429,12 @@ if GlobalSys:CommandLineCheck("-novr") then
                     ClimbLadder(80)
                 end
             end
+
+            if GetMapName() == "a2_pistol" then
+                if vlua.find(Entities:FindAllInSphere(Vector(439, 896, 454), 10), player) then
+                    ClimbLadder(540)
+                end
+            end
         end
     end, "", 0)
 
@@ -448,10 +454,11 @@ if GlobalSys:CommandLineCheck("-novr") then
         end
 
         SendToConsole("mouse_pitchyaw_sensitivity " .. MOUSE_SENSITIVITY)
+        SendToConsole("snd_remove_soundevent HL2Player.UseDeny")
 
         if GetMapName() == "startup" then
             SendToConsole("sv_cheats 1")
-            SendToConsole("addon_enable NoVRMapEdits")
+            SendToConsole("addon_enable novr")
             SendToConsole("hidehud 96")
             SendToConsole("mouse_disableinput 1")
             SendToConsole("bind " .. PRIMARY_ATTACK .. " +use")
@@ -473,12 +480,11 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("bind " .. NOCLIP .. " noclip")
             SendToConsole("bind " .. QUICK_SAVE .. " \"save quick;play sounds/ui/beepclear.vsnd;ent_fire text_quicksave showmessage\"")
             SendToConsole("bind " .. QUICK_LOAD .. " \"load quick\"")
-            SendToConsole("bind " .. MAIN_MENU .. " \"map startup;save exit\"")
+            SendToConsole("bind " .. MAIN_MENU .. " \"addon_play startup\"")
             SendToConsole("bind " .. PRIMARY_ATTACK .. " +iv_attack")
             SendToConsole("bind " .. SECONDARY_ATTACK .. " +customattack2")
             SendToConsole("bind " .. TERTIARY_ATTACK .. " +customattack3")
             SendToConsole("bind " .. COVER_MOUTH .. " +covermouth")
-            print(COVER_MOUTH)
             SendToConsole("hl2_sprintspeed 140")
             SendToConsole("hl2_normspeed 140")
             SendToConsole("r_drawviewmodel 0")
@@ -538,8 +544,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                     "models/industrial/industrial_board_06.vmdl",
                     "models/industrial/industrial_board_07.vmdl",
                     "models/industrial/industrial_chemical_barrel_02.vmdl",
-                    "models/props_junk/wood_crate001a.vmdl",
-                    "models/props_junk/wood_crate002a.vmdl",
+                    "models/props/barrel_plastic_1.vmdl",
+                    "models/props/barrel_plastic_1_open.vmdl",
                 }
                 ent = Entities:FindByClassname(nil, "prop_physics")
                 while ent do
@@ -584,7 +590,7 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("ent_create env_message { targetname text_quicksave message GAMESAVED }")
 
             SendToConsole("ent_remove text_resin")
-            SendToConsole("ent_create game_text { targetname text_resin effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 fxtime 0.25 holdtime 5 x 0.02 y -0.11 }")
+            SendToConsole("ent_create game_text { targetname text_resin effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 fxtime 0.25 holdtime 5 x 0.02 y -0.16 }")
 
             if GetMapName() == "a1_intro_world" then
                 ent = Entities:FindByName(nil, "51_ladder_hint_trigger")
@@ -604,6 +610,10 @@ if GlobalSys:CommandLineCheck("-novr") then
 
                     ent = Entities:FindByName(nil, "relay_teleported_to_refuge")
                     ent:RedirectOutput("OnTrigger", "MoveFreely", ent)
+
+                    SendToConsole("ent_create env_message { targetname text_quicksave_tutorial message QUICKSAVE }")
+                    ent = Entities:FindByClassnameNearest("trigger_once", Vector(-240, 1688, 208), 20)
+                    ent:RedirectOutput("OnTrigger", "ShowQuickSaveTutorial", ent)
 
                     ent = Entities:FindByName(nil, "prop_dogfood")
                     local angles = ent:GetAngles()
@@ -693,8 +703,11 @@ if GlobalSys:CommandLineCheck("-novr") then
                     SendToConsole("give weapon_shotgun")
 
                     if GetMapName() == "a2_drainage" then
-                        SendToConsole("ent_fire wheel_socket setscale 4")
-                        SendToConsole("ent_fire wheel2_socket setscale 4")
+                        SendToConsole("ent_fire wheel_socket SetScale 4")
+                        SendToConsole("ent_fire wheel2_socket SetScale 4")
+                        SendToConsole("ent_fire wheel_physics DisablePickup")
+                        ent = Entities:FindByClassnameNearest("npc_barnacle", Vector(941, -1666, 255), 10)
+                        DoEntFireByInstanceHandle(ent, "AddOutput", "OnRelease>wheel_physics>EnablePickup>>0>1", 0, nil, nil)
                     elseif GetMapName() == "a3_hotel_interior_rooftop" then
                         ent = Entities:FindByClassname(nil, "npc_headcrab_runner")
                         if not ent then
@@ -743,14 +756,19 @@ if GlobalSys:CommandLineCheck("-novr") then
                             ent:Kill()
                         end
                     elseif GetMapName() == "a3_distillery" then
+                        ent = Entities:FindByName(nil, "exit_counter")
+                        ent:RedirectOutput("OnHitMax", "EnablePlugLever", ent)
+
                         if not loading_save_file then
-                            if not loading_save_file then
-                                ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="CHAPTER7_TITLE"})
-                                DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
-                            end
+                            ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="CHAPTER7_TITLE"})
+                            DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
 
                             ent = Entities:FindByName(nil, "11578_2547_relay_koolaid_setup")
                             ent:RedirectOutput("OnTrigger", "FixJeffBatteryPuzzle", ent)
+
+                            SendToConsole("ent_create env_message { targetname text_covermouth message COVERMOUTH }")
+                            ent = Entities:FindByName(nil, "11632_223_cough_volume")
+                            ent:RedirectOutput("OnStartTouch", "ShowCoverMouthTutorial", ent)
                         end
                     else
                         if GetMapName() == "a4_c17_zoo" then
@@ -947,6 +965,22 @@ if GlobalSys:CommandLineCheck("-novr") then
     function ShowCrouchJumpTutorial()
         SendToConsole("ent_fire text_crouchjump ShowMessage")
         SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+
+    function ShowCoverMouthTutorial()   
+        if cvar_getf("viewmodel_offset_y") == 0 then
+            SendToConsole("ent_fire text_covermouth ShowMessage")
+            SendToConsole("play play sounds/ui/beepclear.vsnd")
+        end
+    end
+
+    function ShowQuickSaveTutorial()   
+        SendToConsole("ent_fire text_quicksave_tutorial ShowMessage")
+        SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+
+    function EnablePlugLever()
+        Entities:GetLocalPlayer():Attribute_SetIntValue("plug_lever", 1)
     end
 
     function UnequipCombinGunMechanical()

@@ -50,3 +50,7 @@ V: Noclip (if you get stuck)
 
 ## Official Discord Server
 https://discord.gg/AyfBeuZXsR
+
+## Special Thanks
+- JJL772 for making the flashlight and jump scripts: https://github.com/JJL772/half-life-alyx-scripts
+- Withoutaface for making the amazing HUD: https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-weapons
