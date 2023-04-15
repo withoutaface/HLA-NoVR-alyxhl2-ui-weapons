@@ -3,9 +3,17 @@ NoVR Script for Half-Life: Alyx
 
 ## alyxhl2 ui and weapons
 Addon adds a custom ui, alyx font and viewmodels for the pistol and shotgun.
+(The ui was adapted and merged in the base hla novr repository - source files can be found in subfolder alyxhl2_ui_source_files) 
 Viewmodel for the pistol was created by myself, the shotgun viewmodel is ported from source1 by author [Just Kris](https://gamebanana.com/mods/243462) 
 
-In the release section you can find a standalone addon package. Unzip it, back up game/hlvr/gameinfo.gi and paste the content.
+Please note that the viewmodels are work-in-progress - Enjoy!
+
+## Install alyxhl2 weapon viewmodels
+In the [release section](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-weapons/releases) you can find a addon package for the hla novr mod. 
+- Install the original mod from github or moddb
+- Download the weapon viewmodels from the [release section](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-weapons/releases)
+- Unzip it and paste the content to your HL Alyx installation (including novr mod!)
+- (Optional back up game/hlvr/gameinfo.gi before pasting the zip content)
 
 ![Alt text](image/addon_alyxhl2_ui_weapons_preview.jpg "Preview image ui")
 
