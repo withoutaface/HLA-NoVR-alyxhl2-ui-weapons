@@ -1,6 +1,16 @@
 # HLA-NoVR
 NoVR Script for Half-Life: Alyx
 
+Mod repository note: due to regular (and huge) NoVR main mod changes, I'm constantly updating this repo by manually making reset to clear state, and applying all mod support changes again.
+
+## Mod support
+With this fork of NoVR mod, you will be able to also play & complete next modifications (you can get them from Steam Workshop):
+- ``Levitation`` (campaign, 7 maps + intro)
+- ``Extra-Ordinary Value`` (campaign, 4 maps) 
+- ``Belomorskaya Station`` (1 map)
+- ``Overcharge`` (1 map)
+- ``Red Dust`` (1 map)
+
 ## Installation
 Copy the ``game`` folder into your main Half-Life: Alyx installation folder (e.g. ``C:\Program Files (x86)\Steam\steamapps\common\Half-Life Alyx``).
 
