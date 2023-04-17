@@ -54,7 +54,29 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
                 DoEntFireByInstanceHandle(thisEntity, "Use", "", 0, player, player)
                 if class == "item_hlvr_grenade_frag" then
                     DoEntFireByInstanceHandle(thisEntity, "RunScriptFile", "useextra", 0, player, player)
-                end
+				end
+                if class == "item_hlvr_prop_battery" or class == "item_hlvr_health_station_vial" then
+					local pocketSlotId = 0
+					if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
+						pocketSlotId = 1
+					elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
+						pocketSlotId = 2
+					end
+					if pocketSlotId ~= 0 then
+						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+						FireGameEvent("item_pickup", item_pickup_params)
+						thisEntity:Kill()
+						local itemId = 0
+						if class == "item_hlvr_prop_battery" then
+							itemId = 3
+						elseif class == "item_hlvr_health_station_vial" then
+							itemId = 5
+						end
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", itemId)
+						print("[WristPockets] Item ID " .. itemId .. " acquired on slot #" .. pocketSlotId .. ".")
+						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+					end
+				end
             end
         end, "GrabItem", delay)
     end

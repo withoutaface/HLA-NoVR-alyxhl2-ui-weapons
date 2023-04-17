@@ -2,6 +2,7 @@ if GlobalSys:CommandLineCheck("-novr") then
     DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
+	local isModActive = false -- Mod support by Hypercycle
 
     if player_hurt_ev ~= nil then
         StopListeningToGameEvent(player_hurt_ev)
@@ -155,15 +156,17 @@ if GlobalSys:CommandLineCheck("-novr") then
     end, "", 0)
 
     Convars:RegisterCommand("slowgrenade", function()
-        Entities:GetLocalPlayer():SetThink(function()
+		local player = Entities:GetLocalPlayer()
+        player:SetThink(function()
             local viewmodel = Entities:FindByClassname(nil, "viewmodel")
             if viewmodel and viewmodel:GetModelName() == "models/grenade.vmdl" then
                 local grenade = Entities:FindByClassname(nil, "item_hlvr_grenade_frag")
                 grenade:ApplyAbsVelocityImpulse(-GetPhysVelocity(grenade) * 0.7)
+				Entities:GetLocalPlayer():Attribute_SetIntValue("pocketslots_grenadeinhand", 0)
+				print("[WristPockets] On-hand Grenade is used by player.") -- TODO glitchy - activates when played just choose the grenade!
             end
         end, "SlowGrenade", 0.04)
     end, "", 0)
-
 
     -- Custom attack 2
 
@@ -267,6 +270,10 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("npc_kill")
             DoEntFire("!picker", "RunScriptFile", "vortenergyhit", 0, nil, nil)
             StartSoundEventFromPosition("VortMagic.Throw", startVector)
+			local vortEnergyCell = Entities:FindByClassnameNearest("point_vort_energy", Vector(traceTable.pos.x,traceTable.pos.y,traceTable.pos.z), 20)
+			if vortEnergyCell then
+				vortEnergyCell:FireOutput("OnEnergyPulled", nil, nil, nil, 0)
+			end
         end
     end, "", 0)
 
@@ -407,7 +414,160 @@ if GlobalSys:CommandLineCheck("-novr") then
                     SendToConsole("setpos_exact -1392 -2471 53")
                 end
             end
-
+			
+			-- Mod support for Extra-Ordinary Value
+			-- Ladders
+			if GetMapName() == "youreawake" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-2953,409,-379), 20), player) then --1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2941 388 -145")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-2950,286,-148), 20), player) then --2
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2981 323 51")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-2958,0,-153), 20), player) then --3
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2983 19 51")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-3701,160,49), 20), player) then --4
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -3744 161 -152")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5755,263,-379), 20), player) then -- 5
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5796 263 -281")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5867,265,-280), 20), player) then -- 6
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5812 270 -185")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5802,254,-185), 20), player) then -- 7
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5799 202 -34")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8124,-1080,-145), 20), player) then -- 8
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8132 -1004 78")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8128,-45,-5), 20), player) then -- 9
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8172 -49 169")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8742,-1596,181), 20), player) then -- 10
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8757 -1592 -375")
+				end
+			end
+			if GetMapName() == "seweroutskirts" then
+				if vlua.find(Entities:FindAllInSphere(Vector(559,-273,2), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 478 -269 163")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(2828,-1395,-95), 8), player) then -- 2
+					ClimbLadder(42)
+				end
+			end
+			if GetMapName() == "facilityredux" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-1757,-856,323), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -1750.5 -883 55")
+				end
+			end
+			if GetMapName() == "helloagain" then
+				if vlua.find(Entities:FindAllInSphere(Vector(430,-1092,-216), 8), player) then -- 1
+					ClimbLadder(5)
+				end
+			end 
+			-- Mod support for Overcharge
+			if GetMapName() == "mc1_higgue" then
+				if vlua.find(Entities:FindAllInSphere(Vector(302,856,106), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 305 810 170")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(302,520,243), 20), player) then -- window
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 341 521 200")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(2023,587,-151), 8), player) then -- 2
+					ClimbLadder(-80)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-179,-1320,104), 8), player) then -- 3
+					ClimbLadder(135)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-299,-1352,192), 8), player) then -- 4
+					ClimbLadder(228)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-531,-1374,296), 8), player) then -- 5
+					ClimbLadder(331)
+				end
+			end
+			-- Mod support for Levitation
+			if GetMapName() == "01_intro" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-7617,6622,-3216), 20), player) then -- 1
+					ClimbLadder(-3070)
+				end
+			end
+			if GetMapName() == "03_metrodynamo" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-13,-2719,-69), 3), player) then -- 1
+					ClimbLadder(-20)
+				end
+			end
+			if GetMapName() == "04_hehungers" then 
+--				if vlua.find(Entities:FindAllInSphere(Vector(44,-3456,-832), 20), player) then -- 1 
+--					ClimbLadder(-510)
+				if vlua.find(Entities:FindAllInSphere(Vector(86,-3506,-448), 5), player) then -- 2
+					ClimbLadder(-380)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(109,-3559,-286), 5), player) then -- 3 non-straight ladder
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 67.597 -3547.483 -78")
+				end
+			end
+			if GetMapName() == "05_pleasantville" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(905,-698,7790), 5), player) then -- 1
+					ClimbLadder(7895)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(924,-698,7920), 10), player) then -- 1r
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 894.993 -698.078 7740")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(613,-990,7756), 10), player) then -- 2 TODO: with lock
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 612.300 -1047.172 7891")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(613,-1040,7918), 10), player) then -- 2r
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 613.590 -985.104 7705")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(672,-797,7964), 20), player) then -- huge jump
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 676.863 -597.481 7918")
+				end 
+			end
+			if GetMapName() == "06_digdeep" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(-913,1094,137), 8), player) then -- 1
+					ClimbLadder(196)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-356,716,664), 8), player) then -- 2r
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -355.712 753.690 415")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-355,741,464), 8), player) then -- 2
+					ClimbLadder(655)
+				end 
+			end
+			if GetMapName() == "07_sectorx" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(-689,255,-236), 8), player) then -- 1
+					ClimbLadder(-232)
+				end
+			end
+			if GetMapName() == "08_burningquestions" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(158,248,-9128), 8), player) then -- 1
+					ClimbLadder(-8982)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(158,216,-8960), 10), player) then -- 1r
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 159.402 252.582 -9184") 
+				end
+			end
+			
             if GetMapName() == "a3_distillery" then
                 if vlua.find(Entities:FindAllInSphere(Vector(20,-518,211), 20), player) then
                     ClimbLadderSound()
@@ -635,6 +795,110 @@ if GlobalSys:CommandLineCheck("-novr") then
 
             SendToConsole("ent_remove text_resin")
             SendToConsole("ent_create game_text { targetname text_resin effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 fxtime 0.25 holdtime 5 x 0.02 y -0.16 }")
+			
+			-- Fake Wrist Pockets, by Hypercycle
+			SendToConsole("ent_remove text_pocketslots")
+            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 1 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
+			SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
+			SendToConsole("bind z pocketslots_healthpen") -- use health pen
+			SendToConsole("bind x pocketslots_grenade") -- add HL2 grenade as a weapon
+			SendToConsole("bind c pocketslots_dropitem") -- drop item from one of slots
+			local player = Entities:GetLocalPlayer()
+			if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 1 or player:Attribute_GetIntValue("pocketslots_slot2", 0) == 1 then
+				ent = Entities:FindByName(nil, "text_pocketslots") -- display slots after level boots
+				DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+			end
+			
+			-- pocketslots_slot1-2 values: 
+			-- 0 - empty, 1 - health pen, 2 - grenade, 3 - battery, 4 - key card, 5 - health station vial
+			Convars:RegisterCommand("pocketslots_healthpen", function()
+				local isPlayerAtFullHP = player:GetHealth() == player:GetMaxHealth()
+				local pocketSlotId = 0
+				
+				if player:Attribute_GetIntValue("pocketslots_slot2", 0) == 1 then
+					pocketSlotId = 2 -- use slot 2 first
+				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) == 1 then
+					pocketSlotId = 1
+				end
+				if pocketSlotId ~= 0 then
+					if not isPlayerAtFullHP then
+						player:SetHealth(min(player:GetHealth() + cvar_getf("hlvr_health_vial_amount"), player:GetMaxHealth()))
+						StartSoundEventFromPosition("HealthPen.Stab", player:EyePosition())
+						StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+						print("[WristPockets] Health pen has been used from slot #" .. pocketSlotId .. ".")
+						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+					else
+						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
+						print("[WristPockets] Player already is on full health.")
+					end
+				else
+					print("[WristPockets] Player don't have any health pens on inventory.")
+				end 
+			end, "Toggles the inventory health pen, if exists", 0)		
+			
+			Convars:RegisterCommand("pocketslots_grenade", function()
+				local pocketSlotId = 0
+				if player:Attribute_GetIntValue("pocketslots_slot2", 0) == 2 then
+					pocketSlotId = 2 -- use slot 2 first
+				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) == 2 then
+					pocketSlotId = 1
+				end
+				if pocketSlotId ~= 0 then
+					if player:Attribute_GetIntValue("pocketslots_grenadeinhand", 0) == 0 then
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+						player:Attribute_SetIntValue("pocketslots_grenadeinhand", 1)
+						SendToConsole("give weapon_frag")
+						local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+						viewmodel:RemoveEffects(32)
+						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+						print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
+						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+					else
+						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
+						print("[WristPockets] Player already have grenade in hands.")
+					end
+				else
+					print("[WristPockets] Player don't have any grenades on inventory.")
+				end 
+			end, "Take the grenade in hands, if any exists on pockets", 0)		
+			
+			Convars:RegisterCommand("pocketslots_dropitem", function()
+				local pocketSlotId = 0
+				if player:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
+					pocketSlotId = 2 -- use slot 2 first
+				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 then
+					pocketSlotId = 1
+				end
+				
+				if pocketSlotId ~= 0 then
+					local itemTypeId = player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "", 0)
+					local player_ang = player:EyeAngles()
+					local startVector = player:EyePosition()
+					local traceTable =
+					{
+						startpos = startVector;
+						endpos = startVector + RotatePosition(Vector(0,0,0), player_ang, Vector(40, 0, 0));
+						ignore = player;
+						mask =  33636363
+					}
+					TraceLine(traceTable)
+
+					if traceTable.hit then -- TODO under certain angle you still can drop item into wall
+						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
+						print("[WristPockets] Cannot drop item - too close to obstacle.")
+					else
+						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "item_healthvial", "item_hlvr_health_station_vial" } -- starts from 1
+						ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
+						
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+						print("[WristPockets] Player has dropped item (Type " .. itemTypeId .. ") from slot #" .. pocketSlotId .. ".")
+						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+					end
+				else
+					print("[WristPockets] Player don't have any items to drop.")
+				end 
+			end, "Drop one item from pockets, if any exists", 0)
 
             if GetMapName() == "a1_intro_world" then
                 if not loading_save_file then
@@ -718,9 +982,154 @@ if GlobalSys:CommandLineCheck("-novr") then
                 end
             else
                 SendToConsole("hidehud 64")
-                SendToConsole("give weapon_pistol")
                 SendToConsole("r_drawviewmodel 1")
                 Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
+				
+				-- Mod support for Extra-Ordinary Value
+				if GetMapName() == "youreawake" then
+					isModActive = true
+				elseif GetMapName() == "seweroutskirts" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight") -- too dark on some places
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact -40 -496 105") 
+						SendToConsole("ent_create env_message { targetname text_flashlight message FLASHLIGHT }")
+					end
+					ent = Entities:FindByName(nil, "freds1v")
+					ent:RedirectOutput("OnSoundFinished", "ModCommon_ShowFlashlightTutorial", ent)
+				elseif GetMapName() == "facilityredux" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact -1734 -736 260") 
+					end
+				elseif GetMapName() == "helloagain" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					ent = Entities:FindByName(nil, "1001_doorfade")
+					ent:RedirectOutput("OnBeginFade", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Overcharge
+				elseif GetMapName() == "mc1_higgue" then
+					isModActive = true
+					SendToConsole("hl2_sprintspeed 180") -- pass jump on the end
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("r_drawviewmodel 0")
+						SendToConsole("hidehud 96")
+					end
+					ent = Entities:FindByName(nil, "fightfinale_end_seqrelay")
+					ent:RedirectOutput("OnTrigger", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Belomorskaya Station
+				elseif GetMapName() == "belomorskaya" then
+					isModActive = true
+					Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 0)
+					ent = Entities:FindByName(nil, "flare_trigger_01")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "ModBelomorskaya_EquipFlare", ent)
+					end
+					ent = Entities:FindByName(nil, "flare_turn_off")
+					ent:RedirectOutput("OnTrigger", "ModBelomorskaya_RemoveFlare", ent)
+					ent = Entities:FindByName(nil, "ending_start")
+					ent:RedirectOutput("OnTrigger", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Levitation
+				elseif GetMapName() == "01_intro" then
+					isModActive = true
+					SendToConsole("r_drawviewmodel 0")
+					SendToConsole("hidehud 96") -- hide hud for intro
+					if not loading_save_file then
+						SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+					end
+					ent = Entities:FindByName(nil, "vo_alyx0b")
+					ent:RedirectOutput("OnSoundFinished", "ModLevitation_AllowMovement", ent)
+				elseif GetMapName() == "02_notimelikenow" then
+					isModActive = true
+					if not loading_save_file then -- Start point collisions can be bugged here
+						SendToConsole("setpos_exact -304.557 331.460 -761")
+					end
+				elseif GetMapName() == "03_metrodynamo" then
+					isModActive = true
+				elseif GetMapName() == "04_hehungers" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					SendToConsole("ent_create env_message { targetname text_flashlight message FLASHLIGHT }")
+					if not loading_save_file then -- Start point collisions can be bugged here
+						SendToConsole("setpos_exact 0.472 442.295 -100") 
+						ModLevitation_SpawnWorkaroundBottlesForJeff()
+					end
+					ent = Entities:FindByName(nil, "introjoke_rus")
+					ent:RedirectOutput("OnSoundFinished", "ModCommon_ShowFlashlightTutorial", ent)
+					-- TODO: Hand covering mouth script required to be here!
+				elseif GetMapName() == "05_pleasantville" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact 868.050 -2345.072 7560") 
+					end
+				elseif GetMapName() == "06_digdeep" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact 504.324 -3157.083 631") 
+					end
+					ent = Entities:FindByName(nil, "relay_vort_magic")
+					ent:RedirectOutput("OnTrigger", "ModLevitation_Map6EndingTransition", ent)
+				elseif GetMapName() == "07_sectorx" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is misplaced
+						SendToConsole("setpos_exact 1212.703 -2168.029 -230") 
+						SendToConsole("ent_create env_message { targetname text_vortenergy message VORTENERGY }")
+						ModLevitation_Map7SpawnWorkaroundBattery()
+						ModLevitation_Map7SpawnWorkaroundBattery2()
+						ModLevitation_Map7SpawnWorkaroundJumpStructure()
+					end
+					ent = Entities:FindByName(nil, "airlock_ceilingdevices_start")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "ModLevitation_Map7EnterCombineTrap", ent)
+					end
+					ent = Entities:FindByName(nil, "airlock_ceilingdevices_stop")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "GiveVortEnergy", ent)
+						ent:RedirectOutput("OnTrigger", "ShowVortEnergyTutorial", ent)
+					end
+					if not ent then -- vort powers is already given
+						GiveVortEnergy()
+						ShowVortEnergyTutorial()
+					end
+					ent = Entities:FindByName(nil, "ending") 
+                    ent:RedirectOutput("OnBeginSequence", "ModLevitation_RemoveVortPowers", ent)
+				elseif GetMapName() == "08_burningquestions" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					SendToConsole("r_drawviewmodel 0")
+					if not loading_save_file then -- Start point is misplaced
+						SendToConsole("setpos_exact -465.745 -540.543 -9209") 
+						SendToConsole("ent_create env_message { targetname text_vortenergy message VORTENERGY }")
+					end
+					ent = Entities:FindByName(nil, "end_fight_relay")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "GiveVortEnergy", ent)
+						ent:RedirectOutput("OnTrigger", "ShowVortEnergyTutorial", ent)
+                    end
+					ent2 = Entities:FindByName(nil, "finish_relay")
+					if ent2 then
+						ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent)
+                    end
+					if not ent and ent2 then -- vort powers is already given
+						GiveVortEnergy()
+						ShowVortEnergyTutorial()
+					end
+					ent = Entities:FindByName(nil, "pre_finale_gman")
+                    ent:RedirectOutput("OnTrigger", "ModLevitation_Map8FinaleStopMove", ent)
+				elseif GetMapName() == "red_dust" then
+					isModActive = true
+					SendToConsole("give weapon_pistol") -- loadout as map intended
+					SendToConsole("give weapon_shotgun")
+					SendToConsole("give weapon_smg1")
+					SendToConsole("hlvr_addresources 20 60 8 100")
+				elseif isModActive == false then -- Default NoVR-mod weapon rule
+					SendToConsole("give weapon_pistol")
+				end
 
                 if GetMapName() == "a2_quarantine_entrance" then
                     if not loading_save_file then
@@ -743,8 +1152,10 @@ if GlobalSys:CommandLineCheck("-novr") then
                         SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
                     end
                 elseif GetMapName() ~= "a2_hideout" then
-                    SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
-                    SendToConsole("give weapon_shotgun")
+                    if isModActive == false then --Default NoVR-mod weapon rule
+						SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+						SendToConsole("give weapon_shotgun")
+					end
 
                     if GetMapName() == "a2_drainage" then
                         SendToConsole("ent_fire wheel_socket SetScale 4")
@@ -1086,4 +1497,90 @@ if GlobalSys:CommandLineCheck("-novr") then
     function EndCredits(a, b)
         SendToConsole("mouse_disableinput 0")
     end
+	
+	function ModCommon_ShowFlashlightTutorial()
+        SendToConsole("ent_fire text_flashlight ShowMessage")
+        SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+	
+	function ModCommon_DisablePlayerActions(a, b)
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModBelomorskaya_EquipFlare(a, b) -- TODO works bad
+		local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+		local viewmodel_ang = viewmodel:GetAngles()
+		local viewmodel_pos = viewmodel:GetAbsOrigin()
+		
+		ent = Entities:FindByName(nil, "flare_01")
+		if ent then
+			ent:SetOrigin(Vector(viewmodel_pos.x + 35, viewmodel_pos.y + 35, viewmodel_pos.z + 35))
+			ent:SetAngles(viewmodel_ang.x, viewmodel_ang.y + 180, viewmodel_ang.z)
+		end
+		DoEntFireByInstanceHandle(ent, "SetParent", "!player", 0, nil, nil)
+		ent = Entities:FindByName(nil, "flare_trigger_01")
+		if ent then
+			ent:Kill()
+		end
+	end
+	
+	function ModBelomorskaya_RemoveFlare(a, b)
+		ent = Entities:FindByName(nil, "flare_01")
+		if ent then
+			ent:Kill()
+		end
+	end
+	
+	function ModLevitation_AllowMovement(a, b)
+		SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+	end
+	
+	function ModLevitation_SpawnWorkaroundBottlesForJeff()
+		SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4415.675 -151"})
+		SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4410.675 -151"})
+	end
+	
+	function ModLevitation_Map5SpawnWorkaroundJumpStructure()
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/tanks/vertical_tank.vmdl", ["origin"]="685.276 -701.073 7780", ["angles"]="0 0 0"})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7720", ["angles"]="0 0 0", ["skin"]=2})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7723", ["angles"]="0 0 180", ["skin"]=2})
+	end
+	
+	function ModLevitation_Map6EndingTransition(a, b)
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundBattery()
+		SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery", ["solid"]=6, ["origin"]="1121.042 -530.784 344"})
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundBattery2()
+		SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery2", ["solid"]=6, ["origin"]="-666.762 493.066 -439.9"})
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundJumpStructure()
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-264.164 -1015.459 486", ["angles"]="0 0 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-268.164 -1015.459 518.5", ["angles"]="0 21 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-270.164 -1015.459 551", ["angles"]="0 7 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-272.164 -1015.459 583.5", ["angles"]="0 -12 0", ["skin"]=0})
+	end
+	
+	function ModLevitation_Map7EnterCombineTrap()
+        SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_smg1;ent_remove weapon_frag")
+        SendToConsole("r_drawviewmodel 0")
+    end
+	
+	function ModLevitation_RemoveVortPowers(a, b)
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModLevitation_Map8FinaleStopMove(a, b)
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+	end
 end
