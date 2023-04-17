@@ -12,8 +12,16 @@ else
     thisEntity:Attribute_SetIntValue("toggle", 0)
 end
 
-if not vlua.find(model, "doorhandle") and name ~= "12712_shotgun_wheel" and name ~= "@pod_shell" and name ~= "589_panel_switch" and name ~= "tc_door_control" and (class == "item_health_station_charger" or (class == "prop_animinteractable" and not vlua.find(name, "5628_2901_barricade_door")) or class == "item_hlvr_combine_console_rack") and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+if not vlua.find(model, "doorhandle") and name ~= "@pod_shell" and name ~= "589_panel_switch" and name ~= "tc_door_control" and (class == "item_health_station_charger" or (class == "prop_animinteractable" and not vlua.find(name, "5628_2901_barricade_door")) or (class == "item_hlvr_combine_console_rack" and Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)[2]:GetCycle() == 1)) and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     if vlua.find(name, "plug") and player:Attribute_GetIntValue("plug_lever", 0) == 0 then
+        return
+    end
+
+    if vlua.find(name, "slide_train_door") and Entities:FindByClassnameNearest("phys_constraint", thisEntity:GetCenter(), 20) then
+        return
+    end
+
+    if name == "12712_shotgun_wheel" and Entities:FindByNameNearest("12712_shotgun_bar_for_wheel", thisEntity:GetCenter(), 20) then
         return
     end
 
@@ -51,12 +59,19 @@ if not vlua.find(model, "doorhandle") and name ~= "12712_shotgun_wheel" and name
 
         if map == "a3_distillery" and name == "verticaldoor_wheel" then
             count = count + 0.001
+        elseif name == "12712_shotgun_wheel" then
+            count = count + 0.003
         else
             count = count + 0.01
         end
 
         if is_console then
             DoEntFireByInstanceHandle(thisEntity, "SetCompletionValue", "" .. count, 0, nil, nil)
+        end
+
+        if name == "12712_shotgun_wheel" then
+            DoEntFireByInstanceHandle(thisEntity, "DisableReturnToCompletion", "" .. count, 0, nil, nil)
+            SendToConsole("ent_fire_output " .. thisEntity:GetName() .. " Position " .. count / 2)
         end
 
         if model == "models/interaction/anim_interact/hand_crank_wheel/hand_crank_wheel.vmdl" then
@@ -67,6 +82,11 @@ if not vlua.find(model, "doorhandle") and name ~= "12712_shotgun_wheel" and name
             thisEntity:FireOutput("OnCompletionA_Forward", nil, nil, nil, 0)
             if name == "barricade_door_hook" then
                 SendToConsole("ent_fire barricade_door SetReturnToCompletionStyle 0")
+            end
+            if name == "12712_shotgun_wheel" then
+                local bar = Entities:FindByName(nil, "12712_shotgun_bar_for_wheel")
+                bar:SetOrigin(Vector(711.395874, 1319.248047, -168.302490))
+                bar:SetAngles(0.087952, 120.220528, 90.588112)
             end
             return nil
         else
@@ -99,7 +119,7 @@ if vlua.find(name, "socket") then
     DoEntFireByInstanceHandle(ent, "Use", "", 0, player, player)
 end
 
-if class == "prop_ragdoll" then
+if class == "prop_ragdoll" or class == "prop_ragdoll_attached" then
     for k, v in pairs(thisEntity:GetChildren()) do
         DoEntFireByInstanceHandle(v, "RunScriptFile", "useextra", 0, player, nil)
     end
@@ -133,10 +153,24 @@ elseif vlua.find(name, "_portaloo_seat") then
     end
 elseif vlua.find(name, "_drawer_") then
     if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
-        thisEntity:ApplyAbsVelocityImpulse(player:GetForwardVector() * 180)
+        thisEntity:ApplyAbsVelocityImpulse(-thisEntity:GetForwardVector() * 100)
     else
-        thisEntity:ApplyAbsVelocityImpulse(-player:GetForwardVector() * 180)
+        thisEntity:ApplyAbsVelocityImpulse(thisEntity:GetForwardVector() * 100)
     end
+elseif vlua.find(name, "_trashbin02_lid") then
+    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,1000,0))
+    else
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,-3000,0))
+    end
+elseif vlua.find(name, "_car_door_rear") then
+    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,1500,0))
+    else
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,-2800,0))
+    end
+elseif vlua.find(name, "ticktacktoe_") then
+    thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,RandomInt(1000, 3000),0))
 end
 
 if vlua.find(name, "_wooden_board") then
@@ -164,10 +198,14 @@ end
 
 if model == "models/props/interactive/washing_machine01a_door.vmdl" then
     if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
-        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,-3000))
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,2000))
     else
-        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,3000))
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,-2000))
     end
+end
+
+if vlua.find(model, "models/props/c17/antenna01") then
+    thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,-2000))
 end
 
 if name == "979_518_button_pusher_prop" then
@@ -182,8 +220,9 @@ if name == "russell_headset" then
     SendToConsole("ent_fire 4962_car_door_left_front close")
 end
 
-if name == "4962_car_door_left_front" or name == "4962_car_door_left_front_window" then
-    SendToConsole("ent_fire 4962_car_door_left_front toggle")
+if vlua.find(model, "car_sedan_a0") and (vlua.find(model, "glass") or vlua.find(model, "door")) then
+    local ent = Entities:FindByClassnameNearest("prop_door_rotating_physics", thisEntity:GetOrigin(), 40)
+    DoEntFireByInstanceHandle(ent, "Toggle", "", 0, nil, nil)
 end
 
 if name == "carousel" then
@@ -224,6 +263,13 @@ if name == "glove_dispenser_brush" then
     SendToConsole("ent_fire relay_give_gravity_gloves trigger")
     SendToConsole("hidehud 1")
     Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
+end
+
+
+---------- a2_pistol ----------
+
+if model == "models/props/distillery/firebox_1_door_a.vmdl" then
+    thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,200))
 end
 
 
@@ -457,25 +503,14 @@ if name == "ChoreoPhysProxy" then
     SendToConsole("ent_fire eli_fall_relay Trigger")
 end
 
-if name == "traincar_01_hatch" then
+if name == "traincar_01_hatch" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+    thisEntity:Attribute_SetIntValue("used", 1)
     SendToConsole("ent_fire_output traincar_01_hackplug OnHackSuccess")
 end
 
 if name == "5325_4704_toner_port_train_gate" then
     SendToConsole("ent_fire_output 5325_4704_train_gate_path_20_to_end OnPowerOn")
     SendToConsole("ent_fire_output 5325_4704_train_gate_path_22_to_end OnPowerOn")
-end
-
-if name == "12712_shotgun_wheel" then
-    SendToConsole("ent_fire !picker SetCompletionValue 10")
-    return
-end
-
-if name == "bell" then
-    DoEntFireByInstanceHandle(thisEntity, "PlayAnimation", "chain_pull", 0, nil, nil)
-    DoEntFireByInstanceHandle(thisEntity, "SetPlaybackRate", "8", 0, nil, nil)
-    SendToConsole("ent_fire_output bell OnCompletionA_Forward")
-    return
 end
 
 if name == "270_trip_mine_item_1" then
@@ -490,22 +525,32 @@ if class == "prop_hlvr_crafting_station_console" then
             if Convars:GetStr("chosen_upgrade") == "pistol_upgrade_aimdownsights" then
                 player:Attribute_SetIntValue("pistol_upgrade_aimdownsights", 1)
                 SendToConsole("give weapon_pistol")
+                SendToConsole("ent_fire text_pistol_upgrade_aimdownsights ShowMessage")
+                SendToConsole("play sounds/ui/beepclear.vsnd")
             elseif Convars:GetStr("chosen_upgrade") == "pistol_upgrade_burstfire" then
                 player:Attribute_SetIntValue("pistol_upgrade_burstfire", 1)
                 SendToConsole("give weapon_pistol")
+                SendToConsole("ent_fire text_pistol_upgrade_burstfire ShowMessage")
+                SendToConsole("play sounds/ui/beepclear.vsnd")
             elseif Convars:GetStr("chosen_upgrade") == "shotgun_upgrade_grenadelauncher" then
                 player:Attribute_SetIntValue("shotgun_upgrade_grenadelauncher", 1)
                 SendToConsole("give weapon_shotgun")
+                SendToConsole("ent_fire text_shotgun_upgrade_grenadelauncher ShowMessage")
+                SendToConsole("play sounds/ui/beepclear.vsnd")
             elseif Convars:GetStr("chosen_upgrade") == "shotgun_upgrade_doubleshot" then
                 player:Attribute_SetIntValue("shotgun_upgrade_doubleshot", 1)
                 SendToConsole("give weapon_shotgun")
+                SendToConsole("ent_fire text_shotgun_upgrade_doubleshot ShowMessage")
+                SendToConsole("play sounds/ui/beepclear.vsnd")
             elseif Convars:GetStr("chosen_upgrade") == "smg_upgrade_aimdownsights" then
                 player:Attribute_SetIntValue("smg_upgrade_aimdownsights", 1)
-                if player:Attribute_SetIntValue("smg_upgrade_fasterfirerate", 0) == 0 then
+                if player:Attribute_GetIntValue("smg_upgrade_fasterfirerate", 0) == 0 then
                     SendToConsole("give weapon_ar2")
                 else
                     SendToConsole("give weapon_smg1")
                 end
+                SendToConsole("ent_fire text_smg_upgrade_aimdownsights ShowMessage")
+                SendToConsole("play sounds/ui/beepclear.vsnd")
             elseif Convars:GetStr("chosen_upgrade") == "smg_upgrade_fasterfirerate" then
                 player:Attribute_SetIntValue("smg_upgrade_fasterfirerate", 1)
                 SendToConsole("ent_remove weapon_ar2")
@@ -546,9 +591,8 @@ if class == "prop_hlvr_crafting_station_console" then
                 if viewmodel:GetModelName() == "models/pistol.vmdl" then
                     SendToConsole("ent_fire weapon_pistol kill 0.02")
                     SendToConsole("impulse 200")
-                    SendToConsole("ent_fire text_resin Display")
                     Convars:SetStr("weapon_in_crafting_station", "pistol")
-                    local console = Entities:FindByClassname(nil, "prop_hlvr_crafting_station_console")
+                    local console = Entities:FindByClassnameNearest("prop_hlvr_crafting_station_console", player:GetOrigin(), 100)
                     local ent = Entities:FindByClassnameNearest("trigger_crafting_station_object_placement", console:GetOrigin(), 40)
                     local angles = ent:GetAngles()
                     local origin = ent:GetCenter() - angles:Forward() * 1.5 - Vector(0,0,2.25)
@@ -583,9 +627,8 @@ if class == "prop_hlvr_crafting_station_console" then
                 elseif viewmodel:GetModelName() == "models/shotgun.vmdl" then
                     SendToConsole("ent_fire weapon_shotgun kill 0.02")
                     SendToConsole("impulse 200")
-                    SendToConsole("ent_fire text_resin Display")
                     Convars:SetStr("weapon_in_crafting_station", "shotgun")
-                    local console = Entities:FindByClassname(nil, "prop_hlvr_crafting_station_console")
+                    local console = Entities:FindByClassnameNearest("prop_hlvr_crafting_station_console", player:GetOrigin(), 100)
                     local ent = Entities:FindByClassnameNearest("trigger_crafting_station_object_placement", console:GetOrigin(), 40)
                     local angles = ent:GetAngles()
                     local origin = ent:GetCenter() - angles:Forward() * 1.5 - Vector(0,0,2.25)
@@ -599,12 +642,12 @@ if class == "prop_hlvr_crafting_station_console" then
                     local origin = ents[2]:GetOrigin() + Vector(0,0,0.04)
                     ent = SpawnEntityFromTableSynchronous("point_clientui_world_panel", {["panel_dpi"]=60, ["height"]=12, ["width"]=21, ["targetname"]="upgrade_ui", ["dialog_layout_name"]="file://{resources}/layout/custom_game/crafting_station_shotgun.xml", ["origin"]= origin.x .. " " .. origin.y .. " " .. origin.z, ["angles"]= angles.x .. " " .. angles.y .. " " .. angles.z })
                     ent.upgrade1 = function()
-                        if player:Attribute_GetIntValue("shotgun_upgrade_grenadelauncher", 0) == 0 then
+                        if player:Attribute_GetIntValue("shotgun_upgrade_doubleshot", 0) == 0 then
                             SendToConsole("chooseupgrade1")
                         end
                     end
                     ent.upgrade2 = function()
-                        if player:Attribute_GetIntValue("shotgun_upgrade_doubleshot", 0) == 0 then
+                        if player:Attribute_GetIntValue("shotgun_upgrade_grenadelauncher", 0) == 0 then
                             SendToConsole("chooseupgrade2")
                         end
                     end
@@ -616,19 +659,18 @@ if class == "prop_hlvr_crafting_station_console" then
                     ent:RedirectOutput("CustomOutput2", "cancelupgrade", ent)
                     SendToConsole("ent_fire upgrade_ui addcssclass HasObject")
                 elseif viewmodel:GetModelName() == "models/smg.vmdl" then
-                    if player:Attribute_SetIntValue("smg_upgrade_fasterfirerate", 0) == 0 then
+                    if player:Attribute_GetIntValue("smg_upgrade_fasterfirerate", 0) == 0 then
                         SendToConsole("ent_fire weapon_ar2 kill 0.02")
                     else
                         SendToConsole("ent_fire weapon_smg1 kill 0.02")
                     end
                     SendToConsole("impulse 200")
-                    SendToConsole("ent_fire text_resin Display")
                     Convars:SetStr("weapon_in_crafting_station", "smg")
-                    local console = Entities:FindByClassname(nil, "prop_hlvr_crafting_station_console")
+                    local console = Entities:FindByClassnameNearest("prop_hlvr_crafting_station_console", player:GetOrigin(), 100)
                     local ent = Entities:FindByClassnameNearest("trigger_crafting_station_object_placement", console:GetOrigin(), 40)
                     local angles = ent:GetAngles()
-                    local origin = ent:GetCenter() - angles:Forward() * 1.6 - Vector(0,0,2.3)
-                    ent = SpawnEntityFromTableSynchronous("prop_dynamic_override", {["targetname"]="weapon_in_fabricator", ["model"]="models/weapons/w_ipistol/ipistol_wm.vmdl", ["origin"]= origin.x .. " " .. origin.y .. " " .. origin.z, ["angles"]= angles.x .. " " .. angles.y .. " " .. angles.z })
+                    local origin = ent:GetCenter() - angles:Forward() * 1.5 - Vector(0,0,2.25)
+                    ent = SpawnEntityFromTableSynchronous("item_hlvr_weapon_rapidfire", {["targetname"]="weapon_in_fabricator", ["origin"]= origin.x .. " " .. origin.y .. " " .. origin.z, ["angles"]= angles.x .. " " .. angles.y .. " " .. angles.z })
                     ent:SetParent(console, "item_attach")
 
                     local ents = Entities:FindAllByClassname("point_clientui_world_panel")
@@ -683,7 +725,7 @@ if map == "a4_c17_parking_garage" then
 end
 
 if map == "a2_train_yard" then
-    if class == "item_hlvr_combine_console_rack" then
+    if class == "item_hlvr_combine_console_rack" and Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)[2]:GetCycle() == 1 then
         local ent = Entities:FindByName(nil, "5325_3947_combine_console")
         DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
     end
@@ -710,7 +752,7 @@ if map == "a2_quarantine_entrance" then
         SendToConsole("ent_fire !picker OnPlugRotated")
     end
 
-    if class == "item_hlvr_combine_console_rack" then
+    if class == "item_hlvr_combine_console_rack" and Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)[2]:GetCycle() == 1 then
         local ent = Entities:FindByName(nil, "17670_combine_console")
         DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
     end
@@ -884,32 +926,44 @@ elseif class == "item_hlvr_clip_energygun" then
         SendToConsole("hlvr_addresources 10 0 0 0")
     end
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_clip_energygun_multiple" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 40 0 0 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_clip_shotgun_multiple" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 0 0 4 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_clip_shotgun_single" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 0 0 1 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_clip_rapidfire" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 0 30 0 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_grenade_frag" then
     if thisEntity:GetSequence() == "vr_grenade_unarmed_idle" then
         FireGameEvent("item_pickup", item_pickup_params)
         StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
         SendToConsole("give weapon_frag")
+        local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    viewmodel:RemoveEffects(32)
         thisEntity:Kill()
     end
 elseif class == "item_healthvial" then
@@ -923,4 +977,3 @@ elseif class == "item_healthvial" then
         thisEntity:Kill()
     end
 end
---]]
