@@ -2,6 +2,7 @@ if GlobalSys:CommandLineCheck("-novr") then
     DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
+	require "storage"
 	local isModActive = false -- Mod support by Hypercycle
 
     if player_hurt_ev ~= nil then
@@ -820,10 +821,9 @@ if GlobalSys:CommandLineCheck("-novr") then
 			SendToConsole("bind x pocketslots_grenade") -- add HL2 grenade as a weapon
 			SendToConsole("bind c pocketslots_dropitem") -- drop item from one of slots
 			local player = Entities:GetLocalPlayer()
-			if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 1 or player:Attribute_GetIntValue("pocketslots_slot2", 0) == 1 then
-				ent = Entities:FindByName(nil, "text_pocketslots") -- display slots after level boots
-				DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-			end
+			if player:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 or player:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
+				DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+			end -- display slots after level boots
 			
 			-- pocketslots_slot1-2 values: 
 			-- 0 - empty, 1 - health pen, 2 - grenade, 3 - battery, 4 - quest item, 5 - health station vial
@@ -901,13 +901,15 @@ if GlobalSys:CommandLineCheck("-novr") then
 					else
 						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } -- starts from 1
 						if itemTypeId == 3 or itemTypeId == 4 or itemTypeId == 5 then
-							ent = EntIndexToHScript(player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex" , 0))
-							ent:EnableMotion() -- put item back from void, solution by FrostEpex
-							ent:SetOrigin(traceTable.pos)
-							ent:SetAngles(player_ang.x,player_ang.y,player_ang.z)
-							ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
+							--ent = EntIndexToHScript(player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex" , 0))
+							--ent:EnableMotion() -- put item back from void, solution by FrostEpex
+							--ent:SetOrigin(traceTable.pos)
+							--ent:SetAngles(player_ang.x,player_ang.y,player_ang.z)
+							--ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
 							
-							player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex", 0)
+							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang, ["targetname"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname"), ["model"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objmodel") })
+							Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", "")
+							Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
 						else -- generic object
 							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
 						end
@@ -1160,7 +1162,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 					-- bloodborne_ladder
 					-- ladders
 					-- ending elevator button
-				elseif GetMapName() == "e3_ship" then
+				elseif GetMapName() == "e3a_ship" then
 					isModActive = true
 					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 					if not loading_save_file then
@@ -1639,4 +1641,17 @@ if GlobalSys:CommandLineCheck("-novr") then
 		SendToConsole("hidehud 4")
 		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
 	end
+	
+	function dump(o)
+        if type(o) == 'table' then
+           local s = '{ '
+           for k,v in pairs(o) do
+              if type(k) ~= 'number' then k = '"'..k..'"' end
+              s = s .. '['..k..'] = ' .. dump(v) .. ','
+           end
+           return s .. '} '
+        else
+           return tostring(o)
+        end
+    end
 end

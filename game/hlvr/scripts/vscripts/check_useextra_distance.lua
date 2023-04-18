@@ -1,3 +1,5 @@
+require "storage"
+
 local class = thisEntity:GetClassname()
 local player = Entities:GetLocalPlayer()
 local startVector = player:EyePosition()
@@ -53,7 +55,7 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
             local ents = Entities:FindAllInSphere(Entities:GetLocalPlayer():EyePosition(), 120)
             if vlua.find(ents, thisEntity) then
 				-- fake wrist pockets for quest items
-				if class == "item_hlvr_prop_battery" or thisEntity:GetModelName() == "models/props/misc/keycard_001.vmdl" or class == "item_hlvr_health_station_vial" then
+				if class == "item_hlvr_prop_battery" or thisEntity:GetModelName() == "models/props/misc/keycard_001.vmdl" or thisEntity:GetModelName() == "models/props/distillery/bottle_vodka.vmdl" or class == "item_hlvr_health_station_vial" then
 					local itemId = 0
 					if class == "item_hlvr_prop_battery" then
 						itemId = 3
@@ -70,10 +72,13 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
 					end
 					if pocketSlotId ~= 0 and itemId ~= 0 then
 						pickupItem = false
-						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
 						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", itemId)
-						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex", thisEntity:entindex())
-						thisEntity:DisableMotion() -- put item very far away, solution by FrostEpex
+						Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", thisEntity:GetName())
+						Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", thisEntity:GetModelName())
+						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+						
+						--thisEntity:Kill()
+						thisEntity:DisableMotion() -- put original item very far away, solution by FrostEpex
 						thisEntity:SetOrigin(Vector(-15000,-15000,-15000))		
 						
 						print("[WristPockets] Item ID " .. itemId .. " acquired on slot #" .. pocketSlotId .. ".")
