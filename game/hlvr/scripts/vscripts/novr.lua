@@ -2,6 +2,7 @@ if GlobalSys:CommandLineCheck("-novr") then
     DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
+	require "storage"
 	local isModActive = false -- Mod support by Hypercycle
 
     if player_hurt_ev ~= nil then
@@ -162,8 +163,6 @@ if GlobalSys:CommandLineCheck("-novr") then
             if viewmodel and viewmodel:GetModelName() == "models/grenade.vmdl" then
                 local grenade = Entities:FindByClassname(nil, "item_hlvr_grenade_frag")
                 grenade:ApplyAbsVelocityImpulse(-GetPhysVelocity(grenade) * 0.7)
-				Entities:GetLocalPlayer():Attribute_SetIntValue("pocketslots_grenadeinhand", 0)
-				print("[WristPockets] On-hand Grenade is used by player.") -- TODO glitchy - activates when played just choose the grenade!
             end
         end, "SlowGrenade", 0.04)
     end, "", 0)
@@ -760,7 +759,25 @@ if GlobalSys:CommandLineCheck("-novr") then
             if ent then
                 local angles = ent:GetAngles()
                 SendToConsole("setang " .. angles.x .. " " .. angles.y .. " 0")
+				local look_delta = QAngle(0, 0, 0)
+                local move_delta = Vector(0, 0, 0)
                 ent:SetThink(function()
+					local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+                    local player = Entities:GetLocalPlayer()
+
+                    local view_bob_x = sin(Time() * 8 % 6.28318530718) * move_delta.y / 4000
+                    local view_bob_y = sin(Time() * 8 % 6.28318530718) * move_delta.x / 4000
+                    local angle = player:GetAngles()
+                    angle = QAngle(0, -angle.y, 0)
+                    move_delta = RotatePosition(Vector(0, 0, 0), angle, player:GetVelocity())
+
+                    local weapon_sway_x = Lerp(0.01, cvar_getf("viewmodel_offset_x"), RotationDelta(look_delta, viewmodel:GetAngles()).y) * 0.95
+                    local weapon_sway_y = Lerp(0.01, cvar_getf("viewmodel_offset_y"), RotationDelta(look_delta, viewmodel:GetAngles()).x) * 0.95
+                    look_delta = viewmodel:GetAngles()
+
+                    cvar_setf("viewmodel_offset_x", view_bob_x + weapon_sway_x)
+                    cvar_setf("viewmodel_offset_y", view_bob_y + weapon_sway_y)
+					
                     local shard = Entities:FindByClassnameNearest("shatterglass_shard", Entities:GetLocalPlayer():GetCenter(), 12)
                     if shard then
                         DoEntFireByInstanceHandle(shard, "Break", "", 0, nil, nil)
@@ -798,7 +815,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 			
 			-- Fake Wrist Pockets, by Hypercycle
 			SendToConsole("ent_remove text_pocketslots")
-            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 1 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
+            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 5 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
 			SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
 			SendToConsole("bind z pocketslots_healthpen") -- use health pen
 			SendToConsole("bind x pocketslots_grenade") -- add HL2 grenade as a weapon
@@ -810,7 +827,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 			end
 			
 			-- pocketslots_slot1-2 values: 
-			-- 0 - empty, 1 - health pen, 2 - grenade, 3 - battery, 4 - key card, 5 - health station vial
+			-- 0 - empty, 1 - health pen, 2 - grenade, 3 - battery, 4 - quest item, 5 - health station vial
 			Convars:RegisterCommand("pocketslots_healthpen", function()
 				local isPlayerAtFullHP = player:GetHealth() == player:GetMaxHealth()
 				local pocketSlotId = 0
@@ -844,20 +861,14 @@ if GlobalSys:CommandLineCheck("-novr") then
 				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) == 2 then
 					pocketSlotId = 1
 				end
-				if pocketSlotId ~= 0 then
-					if player:Attribute_GetIntValue("pocketslots_grenadeinhand", 0) == 0 then
-						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
-						player:Attribute_SetIntValue("pocketslots_grenadeinhand", 1)
-						SendToConsole("give weapon_frag")
-						local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-						viewmodel:RemoveEffects(32)
-						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-						print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
-						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-					else
-						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
-						print("[WristPockets] Player already have grenade in hands.")
-					end
+				if pocketSlotId ~= 0 then -- TODO player can take out grenade even if one already on hands, it goes nowhere!
+					player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+					SendToConsole("give weapon_frag")
+					local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+					viewmodel:RemoveEffects(32)
+					StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+					print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
+					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 				else
 					print("[WristPockets] Player don't have any grenades on inventory.")
 				end 
@@ -888,8 +899,21 @@ if GlobalSys:CommandLineCheck("-novr") then
 						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
 						print("[WristPockets] Cannot drop item - too close to obstacle.")
 					else
-						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "item_healthvial", "item_hlvr_health_station_vial" } -- starts from 1
-						ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
+						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } -- starts from 1
+						if itemTypeId == 3 or itemTypeId == 4 or itemTypeId == 5 then
+							--ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang, ["targetname"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname"), ["model"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objmodel") })
+							--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
+							
+							ent = EntIndexToHScript(Storage:LoadNumber("pocketslots_slot" .. pocketSlotId .. "_objindex"))
+							ent:EnableMotion() -- put item back from void, solution by FrostEpex
+							ent:SetOrigin(player:EyePosition() + AnglesToVector(player:EyeAngles()) * 40)
+							ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
+							
+							Storage:SaveNumber("pocketslots_slot" .. pocketSlotId .. "_objindex", 0)
+							--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
+						else -- generic object
+							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
+						end
 						
 						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
 						print("[WristPockets] Player has dropped item (Type " .. itemTypeId .. ") from slot #" .. pocketSlotId .. ".")
@@ -1123,10 +1147,31 @@ if GlobalSys:CommandLineCheck("-novr") then
                     ent:RedirectOutput("OnTrigger", "ModLevitation_Map8FinaleStopMove", ent)
 				elseif GetMapName() == "red_dust" then
 					isModActive = true
-					SendToConsole("give weapon_pistol") -- loadout as map intended
-					SendToConsole("give weapon_shotgun")
-					SendToConsole("give weapon_smg1")
-					SendToConsole("hlvr_addresources 20 60 8 100")
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("give weapon_shotgun")
+						SendToConsole("give weapon_smg1")
+						SendToConsole("hlvr_addresources 20 60 8 100")
+					end
+				elseif GetMapName() == "back_alley" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("hlvr_addresources 0 0 0 10")
+					end
+					-- ent_fire 91_cfence_relay_disable trigger
+					-- bloodborne_ladder
+					-- ladders
+					-- ending elevator button
+				elseif GetMapName() == "e3_ship" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("give weapon_shotgun")
+						SendToConsole("give weapon_smg1")
+						SendToConsole("hlvr_addresources 20 30 6 10")
+					end
 				elseif isModActive == false then -- Default NoVR-mod weapon rule
 					SendToConsole("give weapon_pistol")
 				end
@@ -1496,6 +1541,20 @@ if GlobalSys:CommandLineCheck("-novr") then
 
     function EndCredits(a, b)
         SendToConsole("mouse_disableinput 0")
+    end
+	
+	function sin(x)
+        local result = 0
+        local sign = 1
+        local term = x
+
+        for i = 1, 10 do -- increase the number of iterations for more accuracy
+          result = result + sign * term
+          sign = -sign
+          term = term * x * x / ((2 * i) * (2 * i + 1))
+        end
+
+        return result
     end
 	
 	function ModCommon_ShowFlashlightTutorial()

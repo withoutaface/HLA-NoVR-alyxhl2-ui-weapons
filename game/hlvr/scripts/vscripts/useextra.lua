@@ -1263,27 +1263,20 @@ elseif class == "item_hlvr_clip_rapidfire" then
 elseif class == "item_hlvr_grenade_frag" then
     if thisEntity:GetSequence() == "vr_grenade_unarmed_idle" then
 		-- player can hold 2 grenades on pockets, and one in hand
-		if player:Attribute_GetIntValue("pocketslots_grenadeinhand", 0) == 1 then
-			local pocketSlotId = 0
-			if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
-				pocketSlotId = 1
-			elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
-				pocketSlotId = 2
-			end
-			if pocketSlotId ~= 0 then
-				StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-				FireGameEvent("item_pickup", item_pickup_params)
-				thisEntity:Kill()
-				player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 2)
-				print("[WristPockets] Grenade acquired on slot #" .. pocketSlotId .. ".")
-				DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-			end
-		else
+		-- for now, all grenades will go straight into pockets
+		local pocketSlotId = 0
+		if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
+			pocketSlotId = 1
+		elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
+			pocketSlotId = 2
+		end
+		if pocketSlotId ~= 0 then
+			StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+			FireGameEvent("item_pickup", item_pickup_params)
 			thisEntity:Kill()
-			player:Attribute_SetIntValue("pocketslots_grenadeinhand", 1)
-			SendToConsole("give weapon_frag")
-			local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-			viewmodel:RemoveEffects(32)
+			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 2)
+			print("[WristPockets] Grenade acquired on slot #" .. pocketSlotId .. ".")
+			DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 		end
     end
 elseif class == "item_healthvial" then
