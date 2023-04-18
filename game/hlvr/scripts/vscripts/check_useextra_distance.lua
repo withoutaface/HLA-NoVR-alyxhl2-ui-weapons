@@ -1,5 +1,3 @@
-require "storage"
-
 local class = thisEntity:GetClassname()
 local player = Entities:GetLocalPlayer()
 local startVector = player:EyePosition()
@@ -51,14 +49,11 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
             delay = 0.45
         end
         thisEntity:SetThink(function()
+			local pickupItem = true
             local ents = Entities:FindAllInSphere(Entities:GetLocalPlayer():EyePosition(), 120)
             if vlua.find(ents, thisEntity) then
-                DoEntFireByInstanceHandle(thisEntity, "Use", "", 0, player, player)
-                if class == "item_hlvr_grenade_frag" then
-                    DoEntFireByInstanceHandle(thisEntity, "RunScriptFile", "useextra", 0, player, player)
-				end
-				
-                if class == "item_hlvr_prop_battery" or thisEntity:GetModelName() == "models/props/misc/keycard_001.vmdl" or class == "item_hlvr_health_station_vial" then
+				-- fake wrist pockets for quest items
+				if class == "item_hlvr_prop_battery" or thisEntity:GetModelName() == "models/props/misc/keycard_001.vmdl" or class == "item_hlvr_health_station_vial" then
 					local itemId = 0
 					if class == "item_hlvr_prop_battery" then
 						itemId = 3
@@ -74,21 +69,22 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
 						pocketSlotId = 2
 					end
 					if pocketSlotId ~= 0 and itemId ~= 0 then
+						pickupItem = false
 						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-						FireGameEvent("item_pickup", item_pickup_params)
-						
 						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", itemId)
-						--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", thisEntity:GetName())
-						--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", thisEntity:GetModelName())
-						--thisEntity:Kill()
-						
-						Storage:SaveNumber("pocketslots_slot" .. pocketSlotId .. "_objindex", thisEntity:entindex())
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex", thisEntity:entindex())
 						thisEntity:DisableMotion() -- put item very far away, solution by FrostEpex
-						thisEntity:SetOrigin(Vector(-15000,-15000,-15000))
+						thisEntity:SetOrigin(Vector(-15000,-15000,-15000))		
 						
 						print("[WristPockets] Item ID " .. itemId .. " acquired on slot #" .. pocketSlotId .. ".")
 						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					end
+				end
+				if pickupItem then -- regular pickup action
+					DoEntFireByInstanceHandle(thisEntity, "Use", "", 0, player, player)
+				end
+                if class == "item_hlvr_grenade_frag" then -- TODO can't pickup for some reason
+                    DoEntFireByInstanceHandle(thisEntity, "RunScriptFile", "useextra", 0, player, player)
 				end
             end
         end, "GrabItem", delay)

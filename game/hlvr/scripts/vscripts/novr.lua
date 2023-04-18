@@ -2,7 +2,6 @@ if GlobalSys:CommandLineCheck("-novr") then
     DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
-	require "storage"
 	local isModActive = false -- Mod support by Hypercycle
 
     if player_hurt_ev ~= nil then
@@ -867,6 +866,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 					local viewmodel = Entities:FindByClassname(nil, "viewmodel")
 					viewmodel:RemoveEffects(32)
 					StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+					SendToConsole("use weapon_frag")
 					print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
 					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 				else
@@ -901,16 +901,13 @@ if GlobalSys:CommandLineCheck("-novr") then
 					else
 						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } -- starts from 1
 						if itemTypeId == 3 or itemTypeId == 4 or itemTypeId == 5 then
-							--ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang, ["targetname"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname"), ["model"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objmodel") })
-							--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
-							
-							ent = EntIndexToHScript(Storage:LoadNumber("pocketslots_slot" .. pocketSlotId .. "_objindex"))
+							ent = EntIndexToHScript(player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex" , 0))
 							ent:EnableMotion() -- put item back from void, solution by FrostEpex
-							ent:SetOrigin(player:EyePosition() + AnglesToVector(player:EyeAngles()) * 40)
+							ent:SetOrigin(traceTable.pos)
+							ent:SetAngles(player_ang.x,player_ang.y,player_ang.z)
 							ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
 							
-							Storage:SaveNumber("pocketslots_slot" .. pocketSlotId .. "_objindex", 0)
-							--Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
+							player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex", 0)
 						else -- generic object
 							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
 						end
