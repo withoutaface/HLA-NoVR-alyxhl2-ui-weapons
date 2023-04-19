@@ -1173,6 +1173,127 @@ if map == "07_sectorx" then
         SendToConsole("ent_fire_output 30569_button_center_pusher onin")
     end
 end
+-- GoldenEye remake maps
+if map == "goldeneye64_damver051" then
+	if name == "2981_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 2981_button_center_pusher onin")
+    end
+	if name == "Obj2_Port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire obj2_port onplugrotated")
+		SendToConsole("ent_fire_output obj2_path5 onpoweron")
+	end
+	if name == "novr_garage_switch" then
+		SendToConsole("ent_fire_output novr_garage_switch oncompletiona")
+    end
+	if name == "novr_tower_switch" then
+		SendToConsole("ent_fire_output novr_tower_switch oncompletiona")
+    end
+	if name == "4423_combine_gun_mechanical" or name == "4424_combine_gun_mechanical" then
+		SendToConsole("bind J novr_goldeneye_dam1_leavecombinegun")
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=3, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Press [J] to get out", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+        SendToConsole("play sounds/ui/beepclear.vsnd")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		local player_ang = player:EyeAngles()
+		if name == "4423_combine_gun_mechanical" then
+			SendToConsole("ent_fire 4423_combine_gun_grab_handle SetParent combine_gun_mechanical")
+			SendToConsole("ent_fire 4423_combine_gun_interact Alpha 0")
+			SendToConsole("ent_fire 4423_combine_gun_mechanical SetParent !player")
+			thisEntity:SetAngles(player_ang.x - 30,player_ang.y - 180,0)
+			SendToConsole("bind " .. PRIMARY_ATTACK .. " \"ent_fire 4423_relay_shoot_gun trigger\"")
+			SendToConsole("r_drawviewmodel 0")
+			thisEntity:Attribute_SetIntValue("used", 1)
+		else
+			SendToConsole("ent_fire 4424_combine_gun_grab_handle SetParent combine_gun_mechanical")
+			SendToConsole("ent_fire 4424_combine_gun_interact Alpha 0")
+			SendToConsole("ent_fire 4424_combine_gun_mechanical SetParent !player")
+			thisEntity:SetAngles(player_ang.x - 30,player_ang.y - 180,0)
+			SendToConsole("bind " .. PRIMARY_ATTACK .. " \"ent_fire 4424_relay_shoot_gun trigger\"")
+			SendToConsole("r_drawviewmodel 0")
+			thisEntity:Attribute_SetIntValue("used", 1)
+		end
+	end
+end
+if map == "goldeneye64dampart2_ver052_master" then
+	if class == "item_hlvr_weapon_generic_pistol" then
+		SendToConsole("hidehud 64")
+		SendToConsole("give weapon_pistol")
+		thisEntity:Kill()
+	end
+	if name == "novr_starthangar_switch" then
+		SendToConsole("ent_fire_output novr_starthangar_switch oncompletiona")
+    end
+	-- station 1
+	if name == "5520_cshield_station_1" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5520_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5520_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5520_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 2
+	if name == "5515_cshield_station_2" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5515_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5515_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5515_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 3
+	if name == "3196_cshield_station_3" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3196_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3196_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3196_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 4
+	if name == "3191_cshield_station_4" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3191_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3191_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3191_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 5
+	if name == "5516_cshield_station_5" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5516_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5516_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5516_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 6
+	if name == "3197_cshield_station_6" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3197_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3197_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3197_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	if name == "novr_endhangar_switch" then
+		SendToConsole("ent_fire_output novr_endhangar_switch oncompletiona")
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		SendToConsole("bind MOUSE1 \"\"")
+    end
+end
 
 if class == "baseanimating" and vlua.find(name, "Console") and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     thisEntity:Attribute_SetIntValue("used", 1)
@@ -1220,7 +1341,7 @@ if vlua.find(class, "item_hlvr_crafting_currency_") then
     end, "", 0)
 
     thisEntity:Kill()
-elseif class == "item_hlvr_clip_energygun" then
+elseif class == "item_hlvr_clip_energygun" or class == "item_hlvr_clip_generic_pistol" then
     FireGameEvent("item_pickup", item_pickup_params)
     if name == "pistol_clip_1" then
         SendToConsole("ent_remove weapon_bugbait")
@@ -1233,7 +1354,7 @@ elseif class == "item_hlvr_clip_energygun" then
     local viewmodel = Entities:FindByClassname(nil, "viewmodel")
     viewmodel:RemoveEffects(32)
     thisEntity:Kill()
-elseif class == "item_hlvr_clip_energygun_multiple" then
+elseif class == "item_hlvr_clip_energygun_multiple" or class == "item_hlvr_clip_generic_pistol_multiple" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 40 0 0 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())

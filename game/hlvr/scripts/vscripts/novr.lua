@@ -12,8 +12,12 @@ if GlobalSys:CommandLineCheck("-novr") then
     player_hurt_ev = ListenToGameEvent('player_hurt', function(info)
         -- Hack to stop pausing the game on death
         if info.health == 0 then
-            SendToConsole("reload")
-            SendToConsole("r_drawvgui 0")
+			if isModActive then
+				SendToConsole("load quick") -- trick to avoid crashes with addons
+			else
+				SendToConsole("reload")
+				SendToConsole("r_drawvgui 0")
+			end
         end
 
         -- Kill on fall damage
@@ -566,6 +570,17 @@ if GlobalSys:CommandLineCheck("-novr") then
 					SendToConsole("setpos_exact 159.402 252.582 -9184") 
 				end
 			end
+			-- GoldenEye remake maps
+			if GetMapName() == "goldeneye64_damver051" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-831,-138,121), 8), player) then -- 1
+					ClimbLadder(260)
+--				elseif vlua.find(Entities:FindAllInSphere(Vector(158,216,-8960), 10), player) then
+--					ClimbLadderSound()
+--					SendToConsole("fadein 0.2")
+--					SendToConsole("setpos_exact 159.402 252.582 -9184") 
+				end
+			end
+			
 			
             if GetMapName() == "a3_distillery" then
                 if vlua.find(Entities:FindAllInSphere(Vector(20,-518,211), 20), player) then
@@ -1205,7 +1220,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 					-- bloodborne_ladder
 					-- ladders
 					-- ending elevator button
-				elseif GetMapName() == "e3a_ship" then
+				elseif GetMapName() == "e3_ship" then
 					isModActive = true
 					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 					if not loading_save_file then
@@ -1214,6 +1229,29 @@ if GlobalSys:CommandLineCheck("-novr") then
 						SendToConsole("give weapon_smg1")
 						SendToConsole("hlvr_addresources 20 30 6 10")
 					end
+				elseif GetMapName() == "goldeneye64_damver051" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("hlvr_addresources 40 0 0 5")
+					end
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(81, -14, 510), 25)
+					ent:SetEntityName("novr_garage_switch")
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(155, -202, 976), 25)
+					ent:SetEntityName("novr_tower_switch")
+				elseif GetMapName() == "goldeneye64dampart2_ver052_master" then
+					isModActive = true
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("hidehud 96") -- TODO find intro triggers
+						SendToConsole("hlvr_addresources 40 0 0 0")
+					end
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(-1226, 28, 540), 25)
+					ent:SetEntityName("novr_starthangar_switch")
+					-- TODO replace all generic weapon items!
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(3987, 33, 539), 25)
+					ent:SetEntityName("novr_endhangar_switch")
 				elseif isModActive == false then -- Default NoVR-mod weapon rule
 					SendToConsole("give weapon_pistol")
 				end
@@ -1697,4 +1735,16 @@ if GlobalSys:CommandLineCheck("-novr") then
 		SendToConsole("hidehud 4")
 		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
 	end
+	
+	Convars:RegisterCommand("novr_goldeneye_dam1_leavecombinegun", function()
+        SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+        SendToConsole("ent_fire 4423_combine_gun_mechanical ClearParent")
+		SendToConsole("ent_fire 4424_combine_gun_mechanical ClearParent")
+        SendToConsole("bind " .. PRIMARY_ATTACK .. " +customattack")
+        local ent = Entities:FindByName(nil, "4423_combine_gun_mechanical")
+        SendToConsole("ent_setpos " .. ent:entindex() .. " -87.649 82.855 493.961")
+        local ent = Entities:FindByName(nil, "4424_combine_gun_mechanical")
+        SendToConsole("ent_setpos " .. ent:entindex() .. " -12.135 -149.014 500.586")
+        SendToConsole("r_drawviewmodel 1")
+    end, "", 0)
 end
