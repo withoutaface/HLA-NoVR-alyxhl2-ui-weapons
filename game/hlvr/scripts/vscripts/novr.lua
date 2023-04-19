@@ -561,8 +561,8 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("sk_max_grenade 9999")
             SendToConsole("sk_auto_reload_time 9999")
             SendToConsole("sv_gravity 500")
-            SendToConsole("alias -covermouth \"ent_fire !player suppresscough 0;ent_fire_output @player_proxy onplayeruncovermouth;ent_fire lefthand disable;viewmodel_offset_y 0\"")
-            SendToConsole("alias +covermouth \"ent_fire !player suppresscough 1;ent_fire_output @player_proxy onplayercovermouth;ent_fire lefthand enable;viewmodel_offset_y -20\"")
+            SendToConsole("alias -covermouth \"ent_fire !player suppresscough 0;ent_fire_output @player_proxy onplayeruncovermouth;ent_fire lefthand Disable;viewmodel_offset_y 0\"")
+            SendToConsole("alias +covermouth \"ent_fire !player suppresscough 1;ent_fire_output @player_proxy onplayercovermouth;ent_fire lefthand Enable;viewmodel_offset_y -20\"")
             SendToConsole("alias -customattack \"-iv_attack;slowgrenade\"")
             SendToConsole("alias +customattack +iv_attack")
             SendToConsole("mouse_disableinput 0")
@@ -584,6 +584,22 @@ if GlobalSys:CommandLineCheck("-novr") then
             end
 
             if not loading_save_file then
+                if is_on_map_or_later("a2_quarantine_entrance") then
+                    SendToConsole("give weapon_pistol")
+                
+                    if is_on_map_or_later("a2_drainage") then
+                        SendToConsole("give weapon_shotgun")
+                
+                        if is_on_map_or_later("a3_hotel_street") then
+                            if Entities:GetLocalPlayer():Attribute_GetIntValue("smg_upgrade_fasterfirerate", 0) == 0 then
+                                SendToConsole("give weapon_ar2")
+                            else
+                                SendToConsole("give weapon_smg1")
+                            end
+                        end
+                    end
+                end
+
                 SendToConsole("ent_fire npc_barnacle AddOutput \"OnGrab>held_prop_dynamic_override>DisableCollision>>0>-1\"")
                 SendToConsole("ent_fire npc_barnacle AddOutput \"OnRelease>held_prop_dynamic_override>EnableCollision>>0>-1\"")
                 local collidable_props = {
@@ -642,18 +658,20 @@ if GlobalSys:CommandLineCheck("-novr") then
                         end
                     end
 
-                    local view_bob_x = sin(Time() * 8 % 6.28318530718) * move_delta.y / 4000
-                    local view_bob_y = sin(Time() * 8 % 6.28318530718) * move_delta.x / 4000
-                    local angle = player:GetAngles()
-                    angle = QAngle(0, -angle.y, 0)
-                    move_delta = RotatePosition(Vector(0, 0, 0), angle, player:GetVelocity())
+                    if cvar_getf("viewmodel_offset_y") ~= -20 then
+                        local view_bob_x = sin(Time() * 8 % 6.28318530718) * move_delta.y / 4000
+                        local view_bob_y = sin(Time() * 8 % 6.28318530718) * move_delta.x / 4000
+                        local angle = player:GetAngles()
+                        angle = QAngle(0, -angle.y, 0)
+                        move_delta = RotatePosition(Vector(0, 0, 0), angle, player:GetVelocity())
 
-                    local weapon_sway_x = Lerp(0.01, cvar_getf("viewmodel_offset_x"), RotationDelta(look_delta, viewmodel:GetAngles()).y) * 0.95
-                    local weapon_sway_y = Lerp(0.01, cvar_getf("viewmodel_offset_y"), RotationDelta(look_delta, viewmodel:GetAngles()).x) * 0.95
-                    look_delta = viewmodel:GetAngles()
+                        local weapon_sway_x = Lerp(0.01, cvar_getf("viewmodel_offset_x"), RotationDelta(look_delta, viewmodel:GetAngles()).y) * 0.95
+                        local weapon_sway_y = Lerp(0.01, cvar_getf("viewmodel_offset_y"), RotationDelta(look_delta, viewmodel:GetAngles()).x) * 0.95
+                        look_delta = viewmodel:GetAngles()
 
-                    cvar_setf("viewmodel_offset_x", view_bob_x + weapon_sway_x)
-                    cvar_setf("viewmodel_offset_y", view_bob_y + weapon_sway_y)
+                        cvar_setf("viewmodel_offset_x", view_bob_x + weapon_sway_x)
+                        cvar_setf("viewmodel_offset_y", view_bob_y + weapon_sway_y)
+                    end
 
                     local shard = Entities:FindByClassnameNearest("shatterglass_shard", player:GetCenter(), 12)
                     if shard then
@@ -772,7 +790,6 @@ if GlobalSys:CommandLineCheck("-novr") then
                 end
             else
                 SendToConsole("hidehud 64")
-                SendToConsole("give weapon_pistol")
                 SendToConsole("r_drawviewmodel 1")
                 Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
 
@@ -798,7 +815,6 @@ if GlobalSys:CommandLineCheck("-novr") then
                     end
                 elseif GetMapName() ~= "a2_hideout" then
                     SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
-                    SendToConsole("give weapon_shotgun")
 
                     if GetMapName() == "a2_drainage" then
                         SendToConsole("ent_fire wheel_socket SetScale 4")
@@ -1108,7 +1124,6 @@ if GlobalSys:CommandLineCheck("-novr") then
     function EnterVaultBeam()
         SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_ar2;ent_remove weapon_smg1;ent_remove weapon_frag")
         SendToConsole("r_drawviewmodel 0")
-        SendToConsole("hidehud 4")
         SendToConsole("ent_fire player_speedmod ModifySpeed 0")
     end
 
@@ -1139,6 +1154,49 @@ if GlobalSys:CommandLineCheck("-novr") then
 
     function EndCredits(a, b)
         SendToConsole("mouse_disableinput 0")
+    end
+
+    function is_on_map_or_later(compare_map)
+        local current_map = GetMapName()
+    
+        local maps = {
+            -- Official Campaign
+            {
+                "a1_intro_world",
+                "a1_intro_world_2",
+                "a2_quarantine_entrance",
+                "a2_pistol",
+                "a2_hideout",
+                "a2_headcrabs_tunnel",
+                "a2_drainage",
+                "a2_train_yard",
+                "a3_station_street",
+                "a3_hotel_lobby_basement",
+                "a3_hotel_underground_pit",
+                "a3_hotel_interior_rooftop",
+                "a3_hotel_street",
+                "a3_c17_processing_plant",
+                "a3_distillery",
+                "a4_c17_zoo",
+                "a4_c17_tanker_yard",
+                "a4_c17_water_tower",
+                "a4_c17_parking_garage",
+                "a5_vault",
+                "a5_ending",
+            },
+        }
+    
+        -- Check each campaign
+        for i = 1, #maps do
+            local current_map_index = vlua.find(maps[i], current_map)
+            local compare_map_index = vlua.find(maps[i], compare_map)
+    
+            if current_map_index and current_map_index < compare_map_index then
+                return false
+            end
+        end
+    
+        return true
     end
 
     function sin(x)
