@@ -1,3 +1,4 @@
+require "storage"
 DoIncludeScript("bindings.lua", nil)
 
 local map = GetMapName()
@@ -1275,6 +1276,7 @@ elseif class == "item_hlvr_grenade_frag" then
 			FireGameEvent("item_pickup", item_pickup_params)
 			thisEntity:Kill()
 			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 2)
+			Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
 			print("[WristPockets] Grenade acquired on slot #" .. pocketSlotId .. ".")
 			DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 		end
@@ -1300,6 +1302,7 @@ elseif class == "item_healthvial" then
 			FireGameEvent("item_pickup", item_pickup_params)
 			thisEntity:Kill()
 			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 1)
+			Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
 			print("[WristPockets] Health pen acquired on slot #" .. pocketSlotId .. ".")
 			DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 		end

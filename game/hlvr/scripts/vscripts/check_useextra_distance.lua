@@ -62,7 +62,7 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
 					elseif class == "prop_physics" then -- generic quest item
 						itemId = 4
 					elseif class == "item_hlvr_health_station_vial" then
-						itemId = 5
+						itemId = 5 -- valuable item, but usually without ent name
 					end
 					local pocketSlotId = 0
 					if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
@@ -70,17 +70,32 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
 					elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
 						pocketSlotId = 2
 					end
+					
 					if pocketSlotId ~= 0 and itemId ~= 0 then
 						pickupItem = false
+						local keepItemInstance = true
+						local keepAcrossMaps = false -- save item for later maps, always new instance
+						if thisEntity:GetName() == "" then
+							keepItemInstance = false -- can't do much with no-name entities
+						end
+						if thisEntity:GetModelName() == "models/props/distillery/bottle_vodka.vmdl" then
+							keepItemInstance = false
+							keepAcrossMaps = true
+						end
+						
 						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", itemId)
 						Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", thisEntity:GetName())
 						Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", thisEntity:GetModelName())
+						if keepItemInstance then
+							thisEntity:DisableMotion() -- put valuable original item very far away, solution by FrostEpex
+							thisEntity:SetOrigin(Vector(-15000,-15000,-15000))		
+						else
+							thisEntity:Kill() -- destroy original instance
+						end
+						Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", keepAcrossMaps)
+						
+						FireGameEvent("item_pickup", item_pickup_params)
 						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-						
-						--thisEntity:Kill()
-						thisEntity:DisableMotion() -- put original item very far away, solution by FrostEpex
-						thisEntity:SetOrigin(Vector(-15000,-15000,-15000))		
-						
 						print("[WristPockets] Item ID " .. itemId .. " acquired on slot #" .. pocketSlotId .. ".")
 						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					end

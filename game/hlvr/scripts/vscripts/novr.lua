@@ -815,14 +815,38 @@ if GlobalSys:CommandLineCheck("-novr") then
 			
 			-- Fake Wrist Pockets, by Hypercycle
 			SendToConsole("ent_remove text_pocketslots")
-            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 5 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
+			--pocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.04 } )
+            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 4 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
+			SendToConsole("ent_remove text_pocketslots_empty")
+			--pocketSlotsMsgEmptyEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots_empty", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=0.5, ["x"]=0.15, ["y"]=-0.04 } )
+			SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 4 fxtime 0.25 holdtime 0.5 x 0.15 y -0.04 }")
+			
 			SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
 			SendToConsole("bind z pocketslots_healthpen") -- use health pen
 			SendToConsole("bind x pocketslots_grenade") -- add HL2 grenade as a weapon
 			SendToConsole("bind c pocketslots_dropitem") -- drop item from one of slots
 			local player = Entities:GetLocalPlayer()
-			if player:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 or player:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
-				DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+			local slot1TypeId = player:Attribute_GetIntValue("pocketslots_slot1", 0)
+			local slot2TypeId = player:Attribute_GetIntValue("pocketslots_slot2", 0)
+			if slot1TypeId ~= 0 or slot2TypeId ~= 0 then
+				if not loading_save_file then
+					if not Storage:LoadBoolean("pocketslots_slot1_keepacrossmaps") then
+						player:Attribute_SetIntValue("pocketslots_slot1", 0)
+						Storage:SaveString("pocketslots_slot1_objname", "")
+						Storage:SaveString("pocketslots_slot1_objmodel", "")
+						Storage:SaveBoolean("pocketslots_slot1_keepacrossmaps", false)
+						print("[WristPockets] Item in slot #1 cannot be carried across maps, removed.")
+					end -- erase teleported items on level change
+					if not Storage:LoadBoolean("pocketslots_slot2_keepacrossmaps") then
+						player:Attribute_SetIntValue("pocketslots_slot2", 0)
+						Storage:SaveString("pocketslots_slot2_objname", "")
+						Storage:SaveString("pocketslots_slot2_objmodel", "")
+						Storage:SaveBoolean("pocketslots_slot2_keepacrossmaps", false)
+						print("[WristPockets] Item in slot #2 cannot be carried across maps, removed.")
+					end
+				end
+				local tempPocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.04 } ) -- awful trick to avoid error on map start
+				DoEntFireByInstanceHandle(tempPocketSlotsMsgEnt, "RunScriptFile", "wristpocketshud", 0, nil, nil)
 			end -- display slots after level boots
 			
 			-- pocketslots_slot1-2 values: 
@@ -830,97 +854,116 @@ if GlobalSys:CommandLineCheck("-novr") then
 			Convars:RegisterCommand("pocketslots_healthpen", function()
 				local isPlayerAtFullHP = player:GetHealth() == player:GetMaxHealth()
 				local pocketSlotId = 0
-				
-				if player:Attribute_GetIntValue("pocketslots_slot2", 0) == 1 then
-					pocketSlotId = 2 -- use slot 2 first
-				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) == 1 then
-					pocketSlotId = 1
-				end
-				if pocketSlotId ~= 0 then
-					if not isPlayerAtFullHP then
-						player:SetHealth(min(player:GetHealth() + cvar_getf("hlvr_health_vial_amount"), player:GetMaxHealth()))
-						StartSoundEventFromPosition("HealthPen.Stab", player:EyePosition())
-						StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
-						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
-						print("[WristPockets] Health pen has been used from slot #" .. pocketSlotId .. ".")
-						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-					else
-						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
-						print("[WristPockets] Player already is on full health.")
-					end
-				else
+				local slot1ItemId = player:Attribute_GetIntValue("pocketslots_slot1", 0)
+				local slot2ItemId = player:Attribute_GetIntValue("pocketslots_slot2", 0)
+				if slot1ItemId == 0 and slot2ItemId == 0 then
+					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots_empty"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					print("[WristPockets] Player don't have any health pens on inventory.")
-				end 
+				else 
+					if slot2ItemId == 1 then
+						pocketSlotId = 2 -- use slot 2 first
+					elseif slot1ItemId == 1 then
+						pocketSlotId = 1
+					end
+					if pocketSlotId ~= 0 then
+						if not isPlayerAtFullHP then
+							player:SetHealth(min(player:GetHealth() + cvar_getf("hlvr_health_vial_amount"), player:GetMaxHealth()))
+							StartSoundEventFromPosition("HealthPen.Stab", player:EyePosition())
+							StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
+							player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+							print("[WristPockets] Health pen has been used from slot #" .. pocketSlotId .. ".")
+							DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+						else
+							StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
+							print("[WristPockets] Player already is on full health.")
+						end
+					end 
+				end
 			end, "Toggles the inventory health pen, if exists", 0)		
 			
 			Convars:RegisterCommand("pocketslots_grenade", function()
 				local pocketSlotId = 0
-				if player:Attribute_GetIntValue("pocketslots_slot2", 0) == 2 then
-					pocketSlotId = 2 -- use slot 2 first
-				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) == 2 then
-					pocketSlotId = 1
-				end
-				if pocketSlotId ~= 0 then -- TODO player can take out grenade even if one already on hands, it goes nowhere!
-					player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
-					SendToConsole("give weapon_frag")
-					local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-					viewmodel:RemoveEffects(32)
-					StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-					SendToConsole("use weapon_frag")
-					print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
-					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-				else
+				local slot1ItemId = player:Attribute_GetIntValue("pocketslots_slot1", 0)
+				local slot2ItemId = player:Attribute_GetIntValue("pocketslots_slot2", 0)
+				if slot1ItemId == 0 and slot2ItemId == 0 then
+					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots_empty"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					print("[WristPockets] Player don't have any grenades on inventory.")
-				end 
+				else 
+					if slot2ItemId == 2 then
+						pocketSlotId = 2 -- use slot 2 first
+					elseif slot1ItemId == 2 then
+						pocketSlotId = 1
+					end
+					if pocketSlotId ~= 0 then -- TODO player can take out grenade even if one already on hands, it goes nowhere!
+						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+						SendToConsole("give weapon_frag")
+						local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+						viewmodel:RemoveEffects(32)
+						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+						SendToConsole("use weapon_frag")
+						print("[WristPockets] Grenade has been armed from slot #" .. pocketSlotId .. ".")
+						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+					end 
+				end
 			end, "Take the grenade in hands, if any exists on pockets", 0)		
 			
 			Convars:RegisterCommand("pocketslots_dropitem", function()
 				local pocketSlotId = 0
-				if player:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
-					pocketSlotId = 2 -- use slot 2 first
-				elseif player:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 then
-					pocketSlotId = 1
-				end
-				
-				if pocketSlotId ~= 0 then
-					local itemTypeId = player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "", 0)
-					local player_ang = player:EyeAngles()
-					local startVector = player:EyePosition()
-					local traceTable =
-					{
-						startpos = startVector;
-						endpos = startVector + RotatePosition(Vector(0,0,0), player_ang, Vector(40, 0, 0));
-						ignore = player;
-						mask =  33636363
-					}
-					TraceLine(traceTable)
-
-					if traceTable.hit then -- TODO under certain angle you still can drop item into wall
-						StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
-						print("[WristPockets] Cannot drop item - too close to obstacle.")
-					else
-						local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } -- starts from 1
-						if itemTypeId == 3 or itemTypeId == 4 or itemTypeId == 5 then
-							--ent = EntIndexToHScript(player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "_objindex" , 0))
-							--ent:EnableMotion() -- put item back from void, solution by FrostEpex
-							--ent:SetOrigin(traceTable.pos)
-							--ent:SetAngles(player_ang.x,player_ang.y,player_ang.z)
-							--ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
-							
-							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang, ["targetname"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname"), ["model"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objmodel") })
-							Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", "")
-							Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
-						else -- generic object
-							ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
-						end
-						
-						player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
-						print("[WristPockets] Player has dropped item (Type " .. itemTypeId .. ") from slot #" .. pocketSlotId .. ".")
-						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-					end
-				else
+				local slot1ItemId = player:Attribute_GetIntValue("pocketslots_slot1", 0)
+				local slot2ItemId = player:Attribute_GetIntValue("pocketslots_slot2", 0)
+				if slot1ItemId == 0 and slot2ItemId == 0 then
+					DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots_empty"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					print("[WristPockets] Player don't have any items to drop.")
-				end 
+				else 
+					if slot2ItemId ~= 0 then
+						pocketSlotId = 2 -- use slot 2 first
+					elseif slot1ItemId ~= 0 then
+						pocketSlotId = 1
+					end
+					if pocketSlotId ~= 0 then
+						local itemTypeId = player:Attribute_GetIntValue("pocketslots_slot" .. pocketSlotId .. "", 0)
+						local player_ang = player:EyeAngles()
+						local startVector = player:EyePosition()
+						local traceTable =
+						{
+							startpos = startVector;
+							endpos = startVector + RotatePosition(Vector(0,0,0), player_ang, Vector(40, 0, 0));
+							ignore = player;
+							mask =  33636363
+						}
+						TraceLine(traceTable)
+	
+						if traceTable.hit then -- TODO under certain angle you still can drop item into wall
+							StartSoundEventFromPosition("HealthStation.Deny", player:EyePosition())
+							print("[WristPockets] Cannot drop item - too close to obstacle.")
+						else
+							local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } -- starts from 1
+							if itemTypeId == 3 or itemTypeId == 4 or itemTypeId == 5 then
+								local entName = Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname")
+								if entName ~= "" and not Storage:LoadBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps") then
+									ent = Entities:FindByName(nil, entName)
+									ent:EnableMotion() -- put item back from void, solution by FrostEpex
+									ent:SetOrigin(traceTable.pos)
+									ent:SetAngles(0,player_ang.y,0)
+									ent:ApplyAbsVelocityImpulse(-GetPhysVelocity(ent))
+								else
+									ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], { ["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang, ["targetname"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objname"), ["model"]= Storage:LoadString("pocketslots_slot" .. pocketSlotId .. "_objmodel") })
+								end
+								Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objname", "")
+								Storage:SaveString("pocketslots_slot" .. pocketSlotId .. "_objmodel", "")
+								Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", false)
+								--Storage:SaveVector("pocketslots_slot" .. pocketSlotId .. "_objrendercolor", Vector(0,0,0))
+								DoEntFireByInstanceHandle(ent, "Use", "", 0, player, player) -- pickup quest item
+							else -- generic object
+								ent = SpawnEntityFromTableSynchronous(itemsClasses[itemTypeId], {["origin"]= traceTable.pos.x .. " " .. traceTable.pos.y .. " " .. traceTable.pos.z, ["angles"]= player_ang })
+							end
+						
+							player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "" , 0)
+							print("[WristPockets] Player has dropped item (Type " .. itemTypeId .. ") from slot #" .. pocketSlotId .. ".")
+							DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
+						end
+					end 
+				end
 			end, "Drop one item from pockets, if any exists", 0)
 
             if GetMapName() == "a1_intro_world" then
@@ -1556,6 +1599,19 @@ if GlobalSys:CommandLineCheck("-novr") then
         return result
     end
 	
+	function dump(o)
+        if type(o) == 'table' then
+           local s = '{ '
+           for k,v in pairs(o) do
+              if type(k) ~= 'number' then k = '"'..k..'"' end
+              s = s .. '['..k..'] = ' .. dump(v) .. ','
+           end
+           return s .. '} '
+        else
+           return tostring(o)
+        end
+    end
+	
 	function ModCommon_ShowFlashlightTutorial()
         SendToConsole("ent_fire text_flashlight ShowMessage")
         SendToConsole("play play sounds/ui/beepclear.vsnd")
@@ -1641,17 +1697,4 @@ if GlobalSys:CommandLineCheck("-novr") then
 		SendToConsole("hidehud 4")
 		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
 	end
-	
-	function dump(o)
-        if type(o) == 'table' then
-           local s = '{ '
-           for k,v in pairs(o) do
-              if type(k) ~= 'number' then k = '"'..k..'"' end
-              s = s .. '['..k..'] = ' .. dump(v) .. ','
-           end
-           return s .. '} '
-        else
-           return tostring(o)
-        end
-    end
 end
