@@ -95,7 +95,7 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
 						Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", keepAcrossMaps)
 						
 						FireGameEvent("item_pickup", item_pickup_params)
-						StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+						StartSoundEventFromPosition("Inventory.WristPocketGrabItem", player:EyePosition())
 						print("[WristPockets] Item ID " .. itemId .. " acquired on slot #" .. pocketSlotId .. ".")
 						DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
 					end

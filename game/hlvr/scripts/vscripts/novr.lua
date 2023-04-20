@@ -831,10 +831,11 @@ if GlobalSys:CommandLineCheck("-novr") then
 			-- Fake Wrist Pockets, by Hypercycle
 			SendToConsole("ent_remove text_pocketslots")
 			--pocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.04 } )
-            SendToConsole("ent_create game_text { targetname text_pocketslots effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 4 fxtime 0.25 holdtime 9999 x 0.15 y -0.04 }")
+            SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0.2 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.15 y -0.028 }")
+			
 			SendToConsole("ent_remove text_pocketslots_empty")
 			--pocketSlotsMsgEmptyEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots_empty", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=0.5, ["x"]=0.15, ["y"]=-0.04 } )
-			SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 channel 4 fxtime 0.25 holdtime 0.5 x 0.15 y -0.04 }")
+			SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.15 y -0.028 }")
 			
 			SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
 			SendToConsole("bind z pocketslots_healthpen") -- use health pen
@@ -860,9 +861,9 @@ if GlobalSys:CommandLineCheck("-novr") then
 						print("[WristPockets] Item in slot #2 cannot be carried across maps, removed.")
 					end
 				end
-				local tempPocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=2, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="92 107 192", ["fadein"]=0, ["fadeout"]=0.15, ["channel"]=4, ["fxtime"]=0.25, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.04 } ) -- awful trick to avoid error on map start
+				local tempPocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=0, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0, ["channel"]=4, ["fxtime"]=0, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.028 } ) -- awful trick to avoid error on map start
 				DoEntFireByInstanceHandle(tempPocketSlotsMsgEnt, "RunScriptFile", "wristpocketshud", 0, nil, nil)
-			end -- display slots after level boots
+			end -- TODO display slots after level boots, somehow it doesn't work
 			
 			-- pocketslots_slot1-2 values: 
 			-- 0 - empty, 1 - health pen, 2 - grenade, 3 - battery, 4 - quest item, 5 - health station vial
@@ -1737,6 +1738,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 	end
 	
 	Convars:RegisterCommand("novr_goldeneye_dam1_leavecombinegun", function()
+		ent = SpawnEntityFromTableSynchronous("point_clientui_world_panel", {["panel_dpi"]=60, ["height"]=12, ["width"]=21, ["targetname"]="aaa", ["dialog_layout_name"]="file://{resources}/layout/game_menus/game_menu_main.xml" })
         SendToConsole("ent_fire player_speedmod ModifySpeed 1")
         SendToConsole("ent_fire 4423_combine_gun_mechanical ClearParent")
 		SendToConsole("ent_fire 4424_combine_gun_mechanical ClearParent")

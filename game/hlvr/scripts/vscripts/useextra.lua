@@ -1393,7 +1393,7 @@ elseif class == "item_hlvr_grenade_frag" then
 			pocketSlotId = 2
 		end
 		if pocketSlotId ~= 0 then
-			StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+			StartSoundEventFromPosition("Inventory.WristPocketGrabItem", player:EyePosition())
 			FireGameEvent("item_pickup", item_pickup_params)
 			thisEntity:Kill()
 			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 2)
@@ -1419,7 +1419,7 @@ elseif class == "item_healthvial" then
 			pocketSlotId = 2
 		end
 		if pocketSlotId ~= 0 then
-			StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+			StartSoundEventFromPosition("Inventory.WristPocketGrabItem", player:EyePosition())
 			FireGameEvent("item_pickup", item_pickup_params)
 			thisEntity:Kill()
 			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 1)

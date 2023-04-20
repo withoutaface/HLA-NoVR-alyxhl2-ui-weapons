@@ -3,8 +3,8 @@ local name = thisEntity:GetName()
 
 -- update wrist pockets slots on HUD
 if name == "text_pocketslots" then
-	local pocketSlot1Msg = "[ ]"
-	local pocketSlot2Msg = "[ ]"
+	local pocketSlot1Msg = " "
+	local pocketSlot2Msg = " "
 	local player = Entities:GetLocalPlayer()
 	local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  } -- starts from 1
 	local itemsUniqueStrings = { "[c] Vo", "[c] Ca"  }
@@ -37,12 +37,13 @@ if name == "text_pocketslots" then
 	else
 		DoEntFireByInstanceHandle(thisEntity, "SetText", "" .. pocketSlot2Msg .. "\n" .. pocketSlot1Msg .. "", 0, nil, nil)
 	end
-	DoEntFireByInstanceHandle(thisEntity, "Display", "", 0, nil, nil)
+	DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots_empty"), "Display", "", 0, nil, nil)
+	DoEntFireByInstanceHandle(thisEntity, "Display", "", 0.1, nil, nil)
 end
 
 -- show empty fake slots
 if name == "text_pocketslots_empty" then
-	local pocketSlotNullMsg = "[ ]"
+	local pocketSlotNullMsg = " "
 	DoEntFireByInstanceHandle(thisEntity, "SetText", "" .. pocketSlotNullMsg .. "\n" .. pocketSlotNullMsg .. "", 0, nil, nil)
 	DoEntFireByInstanceHandle(thisEntity, "Display", "", 0, nil, nil)
 end
