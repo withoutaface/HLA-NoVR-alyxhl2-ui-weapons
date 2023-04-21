@@ -1,19 +1,18 @@
-# HLA-NoVR + alyxhl2 ui and weapons
-NoVR Script for Half-Life: Alyx
+# HLA-NoVR addon mod alyxhl2 ui and weapons
+Unofficial custom viewmodels for the hla novr mod
 
-## alyxhl2 ui and weapons
-Addon contains:
+## addon mod content
 - custom ui
 - alyxhl2 custom font (ui icons)
 - viewmodel pistol
 - viewmodel shotgun
 - viewmodel grenade
-- custom hands texture
+- custom hands texture (optional with displays)
 
 (The ui was adapted and merged in the base hla novr repository - source files can be found in subfolder alyxhl2_ui_source_files) 
 
-Viewmodel for the pistol and grenade by withoutaface
-Viewmodel shotgun is ported by me from source1 by author [Just Kris](https://gamebanana.com/mods/243462) 
+- Viewmodel for the pistol and grenade by withoutaface
+- Viewmodel shotgun is ported by me from source1 by author [Just Kris](https://gamebanana.com/mods/243462) 
 
 Please note that the viewmodels are work-in-progress - Enjoy!
 
@@ -25,8 +24,10 @@ In the [release section](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-wea
 - (Optional back up game/hlvr/gameinfo.gi before pasting the zip content)
 - (Optional download and paste the hands_with_display package if you like it (install viewmodel package first!))
 
-## Videos
-[Video Preview 1](https://youtu.be/smotVBQMiDs)
+## Videos and screenshots
+[Video release preview 2](https://youtu.be/m_roPnFAIdM)
+
+[Video release preview 1](https://youtu.be/smotVBQMiDs)
 
 ![Alt text](image/addon_alyxhl2_ui_weapons_preview2_grenade.jpg "Preview image grenade")
 
@@ -35,6 +36,9 @@ In the [release section](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-wea
 ![Alt text](image/addon_alyxhl2_ui_weapons_preview2_shotgun.jpg "Preview image shotgun")
 
 ![Alt text](image/font_alyxhl2.png "Preview image font")
+
+# HLA-NoVR
+NoVR Script for Half-Life: Alyx
 
 ## Installation
 Copy the ``game`` folder into your main Half-Life: Alyx installation folder (e.g. ``C:\Program Files (x86)\Steam\steamapps\common\Half-Life Alyx``).
