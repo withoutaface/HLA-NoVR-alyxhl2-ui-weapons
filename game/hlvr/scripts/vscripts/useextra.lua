@@ -1,4 +1,3 @@
-require "storage"
 DoIncludeScript("bindings.lua", nil)
 
 local map = GetMapName()
@@ -434,9 +433,12 @@ if class == "prop_dynamic" then
     elseif model == "models/props_combine/combine_doors/combine_door_sm01.vmdl" or model == "models/props_combine/combine_lockers/combine_locker_doors.vmdl" then
         local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 40)
 
-        if ent then
-            ent:FireOutput("OnHackSuccess", nil, nil, nil, 0)
-            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 0)
+        if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
+			DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
+            ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
+            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 1.8)
+			DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
+			ent:Attribute_SetIntValue("used", 1)
         end
     end
 end
@@ -889,9 +891,16 @@ if map == "youreawake" then
 end
 if map == "seweroutskirts" then
 	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+		local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 20)
+        if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
+			DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
+            ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
+            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 1.8)
+			ent:FireOutput("OnHackSuccessAnimationComplete", nil, nil, nil, 1.8)
+			DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
+			ent:Attribute_SetIntValue("used", 1)
+        end
+		--StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
 	end	
 end
 if map == "facilityredux" then
@@ -1386,21 +1395,8 @@ elseif class == "item_hlvr_grenade_frag" then
     if thisEntity:GetSequence() == "vr_grenade_unarmed_idle" then
 		-- player can hold 2 grenades on pockets, and one in hand
 		-- for now, all grenades will go straight into pockets
-		local pocketSlotId = 0
-		if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
-			pocketSlotId = 1
-		elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
-			pocketSlotId = 2
-		end
-		if pocketSlotId ~= 0 then
-			StartSoundEventFromPosition("Inventory.WristPocketGrabItem", player:EyePosition())
-			FireGameEvent("item_pickup", item_pickup_params)
-			thisEntity:Kill()
-			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 2)
-			Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
-			print("[WristPockets] Grenade acquired on slot #" .. pocketSlotId .. ".")
-			DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-		end
+		WristPockets_PickUpGrenade(player, thisEntity)
+		FireGameEvent("item_pickup", item_pickup_params)
     end
 elseif class == "item_healthvial" then
     if player:GetHealth() < player:GetMaxHealth() then
@@ -1412,20 +1408,7 @@ elseif class == "item_healthvial" then
         StartSoundEventFromPosition("HealthPen.Success02", player:EyePosition())
         thisEntity:Kill()
     else
-		local pocketSlotId = 0
-		if player:Attribute_GetIntValue("pocketslots_slot1", 0) == 0 then
-			pocketSlotId = 1
-		elseif player:Attribute_GetIntValue("pocketslots_slot2", 0) == 0 then
-			pocketSlotId = 2
-		end
-		if pocketSlotId ~= 0 then
-			StartSoundEventFromPosition("Inventory.WristPocketGrabItem", player:EyePosition())
-			FireGameEvent("item_pickup", item_pickup_params)
-			thisEntity:Kill()
-			player:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 1)
-			Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
-			print("[WristPockets] Health pen acquired on slot #" .. pocketSlotId .. ".")
-			DoEntFireByInstanceHandle(Entities:FindByName(nil, "text_pocketslots"), "RunScriptFile", "wristpocketshud", 0, nil, nil)
-		end
+		WristPockets_PickUpHealthPen(player, thisEntity)
+		FireGameEvent("item_pickup", item_pickup_params)
     end
 end
