@@ -183,7 +183,7 @@ if GlobalSys:CommandLineCheck("-novr") then
     Convars:RegisterCommand("slowgrenade", function()
         Entities:GetLocalPlayer():SetThink(function()
             local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-            if viewmodel and viewmodel:GetModelName() == "models/grenade.vmdl" then
+            if viewmodel and viewmodel:GetModelName() == "models/weapons/v_grenade.vmdl" then
                 local grenade = Entities:FindByClassname(nil, "item_hlvr_grenade_frag")
                 grenade:ApplyAbsVelocityImpulse(-GetPhysVelocity(grenade) * 0.7)
             end
@@ -196,16 +196,16 @@ if GlobalSys:CommandLineCheck("-novr") then
     Convars:RegisterCommand("+customattack2", function()
         local viewmodel = Entities:FindByClassname(nil, "viewmodel")
         local player = Entities:GetLocalPlayer()
-        if viewmodel and viewmodel:GetModelName() ~= "models/grenade.vmdl" then
-            if viewmodel:GetModelName() == "models/shotgun.vmdl" then
+        if viewmodel and viewmodel:GetModelName() ~= "models/weapons/v_grenade.vmdl" then
+            if viewmodel:GetModelName() == "models/weapons/v_shotgun.vmdl" then
                 if player:Attribute_GetIntValue("shotgun_upgrade_doubleshot", 0) == 1 then
                     SendToConsole("+attack2")
                 end
-            elseif viewmodel:GetModelName() == "models/pistol.vmdl" then
+            elseif viewmodel:GetModelName() == "models/weapons/v_pistol.vmdl" then
                 if player:Attribute_GetIntValue("pistol_upgrade_aimdownsights", 0) == 1 then
                     SendToConsole("toggle_zoom")
                 end
-            elseif viewmodel:GetModelName() == "models/smg.vmdl" then
+            elseif viewmodel:GetModelName() == "models/weapons/smg1.vmdl" then
                 if player:Attribute_GetIntValue("smg_upgrade_aimdownsights", 0) == 1 then
                     SendToConsole("toggle_zoom")
                 end
@@ -225,7 +225,7 @@ if GlobalSys:CommandLineCheck("-novr") then
         local viewmodel = Entities:FindByClassname(nil, "viewmodel")
         local player = Entities:GetLocalPlayer()
         if viewmodel then
-            if viewmodel:GetModelName() == "models/shotgun.vmdl" then
+            if viewmodel:GetModelName() == "models/weapons/v_shotgun.vmdl" then
                 if player:Attribute_GetIntValue("shotgun_upgrade_grenadelauncher", 0) == 1 then
                     SendToConsole("use weapon_frag")
                     SendToConsole("+attack")
@@ -237,7 +237,7 @@ if GlobalSys:CommandLineCheck("-novr") then
                         SendToConsole("use weapon_shotgun")
                     end, "BackToShotgun", 0.66)
                 end
-            elseif viewmodel:GetModelName() == "models/pistol.vmdl" then
+            elseif viewmodel:GetModelName() == "models/weapons/v_pistol.vmdl" then
                 if player:Attribute_GetIntValue("pistol_upgrade_burstfire", 0) == 1 then
                     SendToConsole("sk_plr_dmg_pistol 9")
                     SendToConsole("+attack")
@@ -293,6 +293,10 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("npc_kill")
             DoEntFire("!picker", "RunScriptFile", "vortenergyhit", 0, nil, nil)
             StartSoundEventFromPosition("VortMagic.Throw", startVector)
+            local vortEnergyCell = Entities:FindByClassnameNearest("point_vort_energy", Vector(traceTable.pos.x,traceTable.pos.y,traceTable.pos.z), 15)
+            if vortEnergyCell then
+                vortEnergyCell:FireOutput("OnEnergyPulled", nil, nil, nil, 0)
+            end
         end
     end, "", 0)
 
@@ -301,6 +305,25 @@ if GlobalSys:CommandLineCheck("-novr") then
 
         if not player:IsUsePressed() then
             DoEntFire("!picker", "RunScriptFile", "check_useextra_distance", 0, nil, nil)
+
+            local startVector = player:EyePosition()
+            local traceTable =
+            {
+                startpos = startVector;
+                endpos = startVector + RotatePosition(Vector(0,0,0), player:GetAngles(), Vector(100, 0, 0));
+                ignore = player;
+                mask =  33636363
+            }
+        
+            TraceLine(traceTable)
+        
+            if traceTable.hit 
+            then
+                local ent = Entities:FindByClassnameNearest("info_hlvr_toner_junction", traceTable.pos, 10)
+                if ent then
+                    DoEntFireByInstanceHandle(ent, "RunScriptFile", "useextra", 0, nil, nil)
+                end
+            end
 
             if GetMapName() == "a5_vault" then
                 if vlua.find(Entities:FindAllInSphere(Vector(-468, 2902, -519), 20), player) then
@@ -794,6 +817,11 @@ if GlobalSys:CommandLineCheck("-novr") then
                 Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
 
                 if GetMapName() == "a2_quarantine_entrance" then
+                    -- Default Junction Rotations
+                    Entities:FindByName(nil, "toner_junction_1"):Attribute_SetIntValue("junction_rotation", 1)
+                    Entities:FindByName(nil, "toner_junction_2"):Attribute_SetIntValue("junction_rotation", 3)
+                    Entities:FindByName(nil, "toner_junction_3"):Attribute_SetIntValue("junction_rotation", 1)
+
                     if not loading_save_file then
                         ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="CHAPTER2_TITLE"})
                         DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
