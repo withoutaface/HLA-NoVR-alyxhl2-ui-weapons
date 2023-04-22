@@ -5,6 +5,7 @@ local class = thisEntity:GetClassname()
 local name = thisEntity:GetName()
 local model = thisEntity:GetModelName()
 local player = Entities:GetLocalPlayer()
+-- Mod support by Hypercycle
 
 if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
     thisEntity:Attribute_SetIntValue("toggle", 1)
@@ -545,6 +546,12 @@ if class == "item_combine_tank_locker" then
     end
 end
 
+if class == "item_hlvr_weapon_energygun" and map ~= "a1_intro_world_2" then
+	SendToConsole("give weapon_pistol")
+	SendToConsole("ent_remove weapon_bugbait")
+	thisEntity:Kill()
+end
+
 if class == "item_hlvr_weapon_shotgun" then
     SendToConsole("give weapon_shotgun")
     SendToConsole("ent_fire 12712_relay_player_shotgun_is_ready Trigger")
@@ -1052,6 +1059,437 @@ if class == "item_hlvr_headcrab_gland" then
     SendToConsole("ent_fire achievement_squeeze_heart FireEvent")
 end
 
+-- Mod support for Extra-Ordinary Value
+if map == "youreawake" then
+	if name == "1931_headset" then 
+		StartSoundEventFromPosition("RadioHeadset.PutOn", Entities:GetLocalPlayer():EyePosition())
+		SendToConsole("ent_fire_output 1931_headset onputonheadset trigger")
+		SendToConsole("ent_fire 1931_headset kill")
+	end	
+end
+if map == "seweroutskirts" then
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 20)
+        if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
+			DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
+            ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
+            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 1.8)
+			ent:FireOutput("OnHackSuccessAnimationComplete", nil, nil, nil, 1.8)
+			DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
+			ent:Attribute_SetIntValue("used", 1)
+        end
+		--StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+	end	
+end
+if map == "facilityredux" then
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+	end	
+	if name == "2461_inside_elevator_button" then -- UseElevator
+		SendToConsole("ent_fire 2461_elev_button_elevator press")
+	end
+	if name == "2826_vetport" then 
+		SendToConsole("ent_fire 2826_vetport onplugrotated")
+		SendToConsole("ent_fire_output 2826_final onpoweron")
+	end
+	if name == "2826_95_door_reset" then -- UseFenceDoorLever
+		SendToConsole("ent_fire_output 2826_95_relay_flip_switch OnTrigger")
+	end
+end
+if map == "helloagain" then
+	if name == "" and class == "info_hlvr_holo_hacking_plug" then -- Generic hack plug unlock
+		thisEntity:FireOutput("OnHackSuccess", nil, nil, nil, 0)
+	end
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+	end	
+	if name == "393_elev_button_elevator" then -- UseElevatorButton
+		SendToConsole("ent_fire 393_elev_button_elevator press")
+	end
+	if name == "392_392_134_button_center" then
+		SendToConsole("ent_fire_output 392_117_combine_door_open_relay ontrigger")
+	end
+end
+-- Mod support for Belomorskaya Station
+if map == "belomorskaya" then
+	if name == "857_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 857_button_center_pusher onin")
+    end
+	if name == "verticaldoor_wheel" then
+        SendToConsole("ent_fire @verticaldoor setspeed 2")
+		SendToConsole("ent_fire @verticaldoor open")
+    end
+end
+-- Mod support for Overcharge
+if map == "mc1_higgue" then 
+	if name == "introSEQ_button1_p" then -- StartUseElevatorButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output introseq_button1 onin")
+		SendToConsole("hidehud 64")
+		SendToConsole("r_drawviewmodel 1")
+		SendToConsole("give weapon_pistol") -- Pistol on start
+	end -- generic plugs workaround doesn't work here
+	if name == "CmbnDoorLock0" or name == "CmbnDoorLock1" or name == "CmbnDoorLock2" then 
+		local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 40)
+        if ent then
+            ent:FireOutput("OnHackSuccess", nil, nil, nil, 0)
+            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 0)
+			DoEntFireByInstanceHandle(thisEntity, "use", "", 0, nil, nil)
+        end
+	end -- and lockers workaround doesn't work here too
+	if name == "CmbnLocker_SHOT" then
+        SendToConsole("ent_fire CmbnLocker_SHOT alpha 100")
+		SendToConsole("ent_fire CmbnLocker_SHOT disablecollision")
+    end
+	if name == "CmbnLocker_LPUZZ" then
+        SendToConsole("ent_fire CmbnLocker_LPUZZ alpha 100")
+		SendToConsole("ent_fire CmbnLocker_LPUZZ disablecollision")
+    end
+	if name == "CmbnLocker_EATFRESH" then
+        SendToConsole("ent_fire CmbnLocker_EATFRESH alpha 100")
+		SendToConsole("ent_fire CmbnLocker_EATFRESH disablecollision")
+    end
+	if name == "CmbnLocker_SEWER" then
+        SendToConsole("ent_fire CmbnLocker_SEWER alpha 100")
+		SendToConsole("ent_fire CmbnLocker_SEWER disablecollision")
+    end
+	if class == "item_hlvr_weapon_shotgun" then
+        local ent = Entities:FindByName(nil, "wep_shotgun_pickupmusic")
+		DoEntFireByInstanceHandle(ent, "startsound", "", 0, nil, nil)
+    end
+	if model == "models/props_combine/combine_power/power_stake_a.vmdl" and name == "puzzle_wireNEWPort" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output toner_port_plug onhacksuccess")
+		SendToConsole("ent_fire_output pathlmao_n onpoweron") -- npc spawn trigger
+		SendToConsole("ent_fire_output pathe_n onpoweron")
+	end
+	if model == "models/props_combine/combine_power/power_stake_a.vmdl" and name == "puzzle_wirePort" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output toner_port_plug onhacksuccess")
+		SendToConsole("ent_fire_output pathg onpoweron")
+	end
+	if name == "FightFInale_Entry_Button" then -- UseFinaleEntryButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output fightfinale_entry_button onin")
+	end
+	if name == "FightFInale_Lift_Button" then -- UseFinaleLiftButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output fightfinale_lift_button onin")
+	end
+	if name == "FightFinale_Lift_IntButton" then -- UseFinaleLiftIntButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output fightfinale_lift_intbutton onin")
+	end
+	if name == "FightFinale_End_button" then -- UseFinaleEndButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output fightfinale_end_button onin")
+	end
+end
+-- Mod support for Levitation
+if map == "02_notimelikenow" then
+	if name == "TimeGearsValve" then 
+		SendToConsole("ent_fire_output timegearsvalve oncompletiona")
+	end
+	if name == "6061_toner_port" then 
+		SendToConsole("ent_fire 6061_toner_port onplugrotated")
+		SendToConsole("ent_fire_output 6061_toner_path_9 onpoweron")
+	end
+	if name == "43250_button_pusher_prop" then -- PushUselessLiftButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+	end	
+	if name == "31397_mesh_combine_switch_box" then 
+		SendToConsole("ent_fire_output 31397_switch_box_hack_plug OnHackSuccess")
+	end
+	if name == "31397_prop_button" then 
+		SendToConsole("ent_fire_output 31397_handpose_combine_switchbox_button_press OnHandPosed")
+	end	
+	if name == "tonerport" then 
+		SendToConsole("ent_fire_output simpleunlock_path2 onpoweron")
+	end
+end
+if map == "03_metrodynamo" then
+	if name == "toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire toner_port onplugrotated")
+		SendToConsole("ent_fire_output toner_path_1 onpoweron")
+		SendToConsole("ent_fire_output toner_path_2 onpoweron")
+		SendToConsole("ent_fire_output toner_path_4 onpoweron")
+		SendToConsole("ent_fire_output toner_path_5 onpoweron")
+		SendToConsole("ent_fire_output toner_path_real onpoweron")
+		SendToConsole("ent_fire_output toner_path_6 onpoweron")
+		SendToConsole("ent_fire_output toner_path_8 onpoweron")
+		SendToConsole("ent_fire_output toner_path_9 onpoweron")
+		SendToConsole("ent_fire_output toner_path_real onpoweron") -- must be twice?
+	end
+	if name == "10200_126_button_pusher_prop" then -- PushWaterBottlesButton
+        SendToConsole("ent_fire_output 10200_126_button_center_pusher onin")
+    end
+end
+if map == "04_hehungers" then
+	if name == "23711_combine_locker" or name == "23711_locker_hack_plug" then
+		SendToConsole("ent_fire_output 23711_locker_hack_plug OnHackStarted") -- zombie awake
+	end 
+	if name == "power_stake_1_start" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output toner_port_plug OnHackSuccess")
+		SendToConsole("ent_fire_output toner_path_3 onpoweron")
+		SendToConsole("ent_fire_output toner_path_4 onpoweron")
+		SendToConsole("ent_fire_output toner_path_5 onpoweron")
+		SendToConsole("ent_fire_output toner_path_6 onpoweron")
+		SendToConsole("ent_fire_output toner_path_7 onpoweron")
+		SendToConsole("ent_fire_output toner_path_11 onpoweron")
+	end
+	if name == "31397_mesh_combine_switch_box" then 
+		SendToConsole("ent_fire_output 31397_switch_box_hack_plug OnHackSuccess")
+	end
+	if name == "31397_prop_button" then 
+		SendToConsole("ent_fire_output 31397_handpose_combine_switchbox_button_press OnHandPosed")
+	end	
+	if name == "43879_button_pusher_prop" then -- PushLiftButton
+		SendToConsole("ent_fire_output 43879_button_center_pusher onin")
+	end
+end
+if map == "05_pleasantville" then
+	if name == "15708_mesh_combine_switch_box" then 
+		SendToConsole("ent_fire_output 15708_switch_box_hack_plug OnHackSuccess")
+	end
+	if name == "15708_prop_button" then 
+		SendToConsole("ent_fire_output 15708_handpose_combine_switchbox_button_press OnHandPosed")
+	end	
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+	end	
+	if name == "29473_button_pusher_prop" then -- PushWaterBottlesButton
+        SendToConsole("ent_fire_output 29473_button_center_pusher onin")
+    end
+	if name == "29494_button_pusher_prop" then -- PushSecretButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 29494_button_center_pusher onin")
+    end
+	if name == "32803_antlion_plug_crank_a" then
+        SendToConsole("ent_fire_output 32803_antlion_plug_crank_a oncompletionc_forward")
+    end
+	if name == "32822_antlion_plug_crank_a" then
+        SendToConsole("ent_fire_output 32822_antlion_plug_crank_a oncompletionc_forward")
+    end
+	if name == "32818_antlion_plug_crank_a" then
+        SendToConsole("ent_fire_output 32818_antlion_plug_crank_a oncompletionc_forward")
+    end
+	if name == "32808_antlion_plug_crank_a" then
+        SendToConsole("ent_fire_output 32808_antlion_plug_crank_a oncompletionc_forward")
+    end
+	if name == "32812_antlion_plug_crank_a" then
+        SendToConsole("ent_fire_output 32812_antlion_plug_crank_a oncompletionc_forward")
+    end
+	if name == "29732_button_pusher_prop" then -- PushEndButton
+        SendToConsole("ent_fire_output 29732_button_center_pusher onin")
+    end
+end
+if map == "06_digdeep" then
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+	end	
+	if name == "28212_button_pusher_prop" then -- PushElevatorButton
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 28212_button_center_pusher onin")
+    end
+	if name == "toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output toner_port_plug OnHackSuccess")
+		SendToConsole("ent_fire_output toner_path_1 onpoweron")
+		SendToConsole("ent_fire_output toner_path_4 onpoweron")
+		SendToConsole("ent_fire_output toner_path_6 onpoweron")
+		SendToConsole("ent_fire_output toner_path_9 onpoweron")
+	end
+	if name == "movelever" and Entities:FindByName(nil, "toner_port"):Attribute_GetIntValue("used", 0) == 1 then 
+		SendToConsole("ent_fire_output movelever oncompletiona")
+	end
+end
+if map == "07_sectorx" then
+	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
+		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
+	end	
+	if name == "novr_workaround_battery" then -- PlayerTakeNoVRBattery
+		SendToConsole("ent_fire 8621_powerunit_relay_reviver_removed trigger")
+	end
+	if name == "novr_workaround_battery2" then -- PlayerTakeNoVRBattery2
+		SendToConsole("ent_fire 10554_powerunit_relay_reviver_removed trigger")
+	end
+	if name == "11919_mesh_combine_switch_box" then 
+		SendToConsole("ent_fire_output 11919_switch_box_hack_plug OnHackSuccess")
+	end
+	if name == "11919_prop_button" then 
+		SendToConsole("ent_fire_output 11919_handpose_combine_switchbox_button_press OnHandPosed")
+	end	
+	if name == "30575_button_pusher_prop" then -- 1 
+        SendToConsole("ent_fire_output 30575_button_center_pusher onin")
+    end
+	if name == "30576_button_pusher_prop" then -- 2
+        SendToConsole("ent_fire_output 30576_button_center_pusher onin")
+    end
+	if name == "30572_button_pusher_prop" then -- 3
+        SendToConsole("ent_fire_output 30572_button_center_pusher onin")
+    end
+	if name == "30581_button_pusher_prop" then -- 4
+        SendToConsole("ent_fire_output 30581_button_center_pusher onin")
+    end
+	if name == "30582_button_pusher_prop" then -- 5
+        SendToConsole("ent_fire_output 30582_button_center_pusher onin")
+    end
+	if name == "30578_button_pusher_prop" then -- 6
+        SendToConsole("ent_fire_output 30578_button_center_pusher onin")
+    end
+	if name == "30567_button_pusher_prop" then -- 7
+        SendToConsole("ent_fire_output 30567_button_center_pusher onin")
+    end
+	if name == "30570_button_pusher_prop" then
+        SendToConsole("ent_fire_output 30570_button_center_pusher onin")
+    end
+	if name == "30569_button_pusher_prop" then
+        SendToConsole("ent_fire_output 30569_button_center_pusher onin")
+    end
+end
+-- GoldenEye remake maps
+if map == "goldeneye64_damver051" then
+	if name == "2981_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 2981_button_center_pusher onin")
+    end
+	if name == "Obj2_Port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire obj2_port onplugrotated")
+		SendToConsole("ent_fire_output obj2_path5 onpoweron")
+	end
+	if name == "novr_garage_switch" then
+		SendToConsole("ent_fire_output novr_garage_switch oncompletiona")
+    end
+	if name == "novr_tower_switch" then
+		SendToConsole("ent_fire_output novr_tower_switch oncompletiona")
+    end
+	if name == "4423_combine_gun_mechanical" or name == "4424_combine_gun_mechanical" then
+		SendToConsole("bind J novr_goldeneye_dam1_leavecombinegun")
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=3, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Press [J] to get out", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+        SendToConsole("play sounds/ui/beepclear.vsnd")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		local player_ang = player:EyeAngles()
+		if name == "4423_combine_gun_mechanical" then
+			SendToConsole("ent_fire 4423_combine_gun_grab_handle SetParent combine_gun_mechanical")
+			SendToConsole("ent_fire 4423_combine_gun_interact Alpha 0")
+			SendToConsole("ent_fire 4423_combine_gun_mechanical SetParent !player")
+			thisEntity:SetAngles(player_ang.x - 30,player_ang.y - 180,0)
+			SendToConsole("bind " .. PRIMARY_ATTACK .. " \"ent_fire 4423_relay_shoot_gun trigger\"")
+			SendToConsole("r_drawviewmodel 0")
+			thisEntity:Attribute_SetIntValue("used", 1)
+		else
+			SendToConsole("ent_fire 4424_combine_gun_grab_handle SetParent combine_gun_mechanical")
+			SendToConsole("ent_fire 4424_combine_gun_interact Alpha 0")
+			SendToConsole("ent_fire 4424_combine_gun_mechanical SetParent !player")
+			thisEntity:SetAngles(player_ang.x - 30,player_ang.y - 180,0)
+			SendToConsole("bind " .. PRIMARY_ATTACK .. " \"ent_fire 4424_relay_shoot_gun trigger\"")
+			SendToConsole("r_drawviewmodel 0")
+			thisEntity:Attribute_SetIntValue("used", 1)
+		end
+	end
+	if name == "5088_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 5088_button_center_pusher onin")
+    end
+	if name == "5043_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 5043_button_center_pusher onin")
+    end
+end
+if map == "goldeneye64dampart2_ver052_master" then
+	if class == "item_hlvr_weapon_generic_pistol" then
+		SendToConsole("hidehud 64")
+		SendToConsole("give weapon_pistol")
+		thisEntity:Kill()
+	end
+	if name == "novr_starthangar_switch" then
+		SendToConsole("ent_fire_output novr_starthangar_switch oncompletiona")
+    end
+	-- station 1
+	if name == "5520_cshield_station_1" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5520_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5520_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5520_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 2
+	if name == "5515_cshield_station_2" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5515_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5515_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5515_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 3
+	if name == "3196_cshield_station_3" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3196_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3196_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3196_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 4
+	if name == "3191_cshield_station_4" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3191_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3191_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3191_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 5
+	if name == "5516_cshield_station_5" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 5516_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "5516_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 5516_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	-- station 6
+	if name == "3197_cshield_station_6" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 3197_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "3197_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 3197_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	if name == "novr_endhangar_switch" then
+		SendToConsole("ent_fire_output novr_endhangar_switch oncompletiona")
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		SendToConsole("bind MOUSE1 \"\"")
+    end
+end
+
 if class == "baseanimating" and vlua.find(name, "Console") and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     thisEntity:Attribute_SetIntValue("used", 1)
     SendToConsole("ent_fire_output *_console_hacking_plug OnHackSuccess")
@@ -1060,6 +1498,7 @@ if class == "baseanimating" and vlua.find(name, "Console") and thisEntity:Attrib
         DoEntFireByInstanceHandle(v, "DisablePickup", "", 0, player, nil)
     end
     SendToConsole("ent_fire 5325_3947_combine_console AddOutput OnTankAdded>item_hlvr_combine_console_tank>DisablePickup>>0>1")
+	SendToConsole("ent_fire 26976_combine_console AddOutput OnTankAdded>item_hlvr_combine_console_tank>DisablePickup>>0>1") -- Levitation mod
 end
 
 if class == "item_hlvr_grenade_xen" then
@@ -1139,13 +1578,21 @@ elseif class == "item_hlvr_clip_rapidfire" then
     viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_grenade_frag" then
+	local goesInPocket = true
     if thisEntity:GetSequence() == "vr_grenade_unarmed_idle" then
-        FireGameEvent("item_pickup", item_pickup_params)
-        StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-        SendToConsole("give weapon_frag")
-        local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-    viewmodel:RemoveEffects(32)
-        thisEntity:Kill()
+		if goesInPocket then
+			-- player can hold 2 grenades on pockets, and one in hand
+			-- for now, all grenades will go straight into pockets
+			WristPockets_PickUpGrenade(player, thisEntity)
+			FireGameEvent("item_pickup", item_pickup_params)
+		else
+			FireGameEvent("item_pickup", item_pickup_params)
+			StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+			SendToConsole("give weapon_frag")
+			local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+			viewmodel:RemoveEffects(32)
+			thisEntity:Kill()
+		end
     end
 elseif class == "item_healthvial" then
     if player:GetHealth() < player:GetMaxHealth() then
@@ -1156,5 +1603,8 @@ elseif class == "item_healthvial" then
         StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
         StartSoundEventFromPosition("HealthPen.Success02", player:EyePosition())
         thisEntity:Kill()
+	else
+		WristPockets_PickUpHealthPen(player, thisEntity)
+		FireGameEvent("item_pickup", item_pickup_params)
     end
 end

@@ -4,7 +4,11 @@ if GlobalSys:CommandLineCheck("-novr") then
     DoIncludeScript("bindings.lua", nil)
     DoIncludeScript("flashlight.lua", nil)
     DoIncludeScript("jumpfix.lua", nil)
-
+	
+	DoIncludeScript("wristpockets.lua", nil)
+	DoIncludeScript("modsupport.lua", nil)
+	local isModActive = ModSupport_IsAddonMap(GetMapName())
+	
     if player_hurt_ev ~= nil then
         StopListeningToGameEvent(player_hurt_ev)
     end
@@ -463,7 +467,166 @@ if GlobalSys:CommandLineCheck("-novr") then
                 end
             end
 
-            if GetMapName() == "a3_distillery" then
+            -- Mod support for Extra-Ordinary Value
+			-- Ladders
+			if GetMapName() == "youreawake" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-2953,409,-379), 20), player) then --1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2941 388 -145")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-2950,286,-148), 20), player) then --2
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2981 323 51")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-2958,0,-153), 20), player) then --3
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -2983 19 51")	
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-3701,160,49), 20), player) then --4
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -3744 161 -152")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5755,263,-379), 20), player) then -- 5
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5796 263 -281")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5867,265,-280), 20), player) then -- 6
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5812 270 -185")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-5802,254,-185), 20), player) then -- 7
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -5799 202 -34")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8124,-1080,-145), 20), player) then -- 8
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8132 -1004 78")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8128,-45,-5), 20), player) then -- 9
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8172 -49 169")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-8742,-1596,181), 20), player) then -- 10
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -8757 -1592 -375")
+				end
+			end
+			if GetMapName() == "seweroutskirts" then
+				if vlua.find(Entities:FindAllInSphere(Vector(559,-273,2), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 478 -269 163")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(2828,-1395,-95), 8), player) then -- 2
+					ClimbLadder(42)
+				end
+			end
+			if GetMapName() == "facilityredux" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-1757,-856,323), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -1750.5 -883 55")
+				end
+			end
+			if GetMapName() == "helloagain" then
+				if vlua.find(Entities:FindAllInSphere(Vector(430,-1092,-216), 8), player) then -- 1
+					ClimbLadder(5)
+				end
+			end 
+			-- Mod support for Overcharge
+			if GetMapName() == "mc1_higgue" then
+				if vlua.find(Entities:FindAllInSphere(Vector(302,856,106), 20), player) then -- 1
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 305 810 170")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(302,520,243), 20), player) then -- window
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 341 521 200")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(2023,587,-151), 8), player) then -- 2
+					ClimbLadder(-80)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-179,-1320,104), 8), player) then -- 3
+					ClimbLadder(135)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-299,-1352,192), 8), player) then -- 4
+					ClimbLadder(228)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-531,-1374,296), 8), player) then -- 5
+					ClimbLadder(331)
+				end
+			end
+			-- Mod support for Levitation
+			if GetMapName() == "01_intro" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-7617,6622,-3216), 20), player) then -- 1
+					ClimbLadder(-3070)
+				end
+			end
+			if GetMapName() == "03_metrodynamo" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-13,-2719,-69), 3), player) then -- 1
+					ClimbLadder(-20)
+				end
+			end
+			if GetMapName() == "04_hehungers" then 
+--				if vlua.find(Entities:FindAllInSphere(Vector(44,-3456,-832), 20), player) then -- 1 
+--					ClimbLadder(-510)
+				if vlua.find(Entities:FindAllInSphere(Vector(86,-3506,-448), 5), player) then -- 2
+					ClimbLadder(-380)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(109,-3559,-286), 5), player) then -- 3 non-straight ladder
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 67.597 -3547.483 -78")
+				end
+			end
+			if GetMapName() == "05_pleasantville" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(905,-698,7790), 5), player) then -- 1
+					ClimbLadder(7895)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(924,-698,7920), 10), player) then -- 1r
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 894.993 -698.078 7740")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(613,-990,7756), 10), player) then -- 2 TODO: with lock
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 612.300 -1047.172 7891")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(613,-1040,7918), 10), player) then -- 2r
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 613.590 -985.104 7705")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(672,-797,7964), 20), player) then -- huge jump
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 676.863 -597.481 7918")
+				end 
+			end
+			if GetMapName() == "06_digdeep" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(-913,1094,137), 8), player) then -- 1
+					ClimbLadder(196)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-356,716,664), 8), player) then -- 2r
+					ClimbLadderSound() 
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact -355.712 753.690 415")
+				elseif vlua.find(Entities:FindAllInSphere(Vector(-355,741,464), 8), player) then -- 2
+					ClimbLadder(655)
+				end 
+			end
+			if GetMapName() == "07_sectorx" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(-689,255,-236), 8), player) then -- 1
+					ClimbLadder(-232)
+				end
+			end
+			if GetMapName() == "08_burningquestions" then 
+				if vlua.find(Entities:FindAllInSphere(Vector(158,248,-9128), 8), player) then -- 1
+					ClimbLadder(-8982)
+				elseif vlua.find(Entities:FindAllInSphere(Vector(158,216,-8960), 10), player) then -- 1r
+					ClimbLadderSound()
+					SendToConsole("fadein 0.2")
+					SendToConsole("setpos_exact 159.402 252.582 -9184") 
+				end
+			end
+			-- GoldenEye remake maps
+			if GetMapName() == "goldeneye64_damver051" then
+				if vlua.find(Entities:FindAllInSphere(Vector(-831,-138,121), 8), player) then -- 1
+					ClimbLadder(260)
+				end
+			end
+			
+			if GetMapName() == "a3_distillery" then
                 if vlua.find(Entities:FindAllInSphere(Vector(20,-518,211), 20), player) then
                     ClimbLadderSound()
                     SendToConsole("fadein 0.2")
@@ -617,7 +780,7 @@ if GlobalSys:CommandLineCheck("-novr") then
             end
 
             if not loading_save_file then
-                if is_on_map_or_later("a2_quarantine_entrance") then
+                if not isModActive and is_on_map_or_later("a2_quarantine_entrance") then
                     SendToConsole("give weapon_pistol")
                 
                     if is_on_map_or_later("a2_drainage") then
@@ -741,7 +904,10 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("ent_remove text_resin")
             SendToConsole("ent_create game_text { targetname text_resin effect 2 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0.15 fxtime 0.25 holdtime 5 x 0.02 y -0.16 }")
 
-            if GetMapName() == "a1_intro_world" then
+            WristPockets_StartupPreparations()
+			WristPockets_CheckPocketItemsOnLoading(Entities:GetLocalPlayer(), loading_save_file)
+			
+			if GetMapName() == "a1_intro_world" then
                 if not loading_save_file then
                     SendToConsole("ent_fire player_speedmod ModifySpeed 0")
                     SendToConsole("mouse_disableinput 1")
@@ -831,6 +997,229 @@ if GlobalSys:CommandLineCheck("-novr") then
                 SendToConsole("hidehud 64")
                 SendToConsole("r_drawviewmodel 1")
                 Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
+				
+				-- Mod support for Extra-Ordinary Value
+				if GetMapName() == "youreawake" then
+					--
+				elseif GetMapName() == "seweroutskirts" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight") -- too dark on some places
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact -40 -496 105") 
+						SendToConsole("ent_create env_message { targetname text_flashlight message FLASHLIGHT }")
+					end
+					ent = Entities:FindByName(nil, "freds1v")
+					ent:RedirectOutput("OnSoundFinished", "ModCommon_ShowFlashlightTutorial", ent)
+				elseif GetMapName() == "facilityredux" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact -1734 -736 260") 
+					end
+				elseif GetMapName() == "helloagain" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					ent = Entities:FindByName(nil, "1001_doorfade")
+					ent:RedirectOutput("OnBeginFade", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Overcharge
+				elseif GetMapName() == "mc1_higgue" then
+					--
+					SendToConsole("hl2_sprintspeed 180") -- pass jump on the end
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("r_drawviewmodel 0")
+						SendToConsole("hidehud 96")
+					end
+					ent = Entities:FindByName(nil, "fightfinale_end_seqrelay")
+					ent:RedirectOutput("OnTrigger", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Belomorskaya Station
+				elseif GetMapName() == "belomorskaya" then
+					--
+					Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 0)
+					ent = Entities:FindByName(nil, "flare_trigger_01")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "ModBelomorskaya_EquipFlare", ent)
+					end
+					ent = Entities:FindByName(nil, "flare_turn_off")
+					ent:RedirectOutput("OnTrigger", "ModBelomorskaya_RemoveFlare", ent)
+					ent = Entities:FindByName(nil, "ending_start")
+					ent:RedirectOutput("OnTrigger", "ModCommon_DisablePlayerActions", ent)
+				-- Mod support for Levitation
+				elseif GetMapName() == "01_intro" then
+					--
+					SendToConsole("r_drawviewmodel 0")
+					SendToConsole("hidehud 96") -- hide hud for intro
+					if not loading_save_file then
+						SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+					end
+					ent = Entities:FindByName(nil, "vo_alyx0b")
+					ent:RedirectOutput("OnSoundFinished", "ModLevitation_AllowMovement", ent)
+				elseif GetMapName() == "02_notimelikenow" then
+					--
+					if not loading_save_file then -- Start point collisions can be bugged here
+						SendToConsole("setpos_exact -304.557 331.460 -761")
+					end
+				elseif GetMapName() == "03_metrodynamo" then
+					--
+				elseif GetMapName() == "04_hehungers" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					SendToConsole("ent_create env_message { targetname text_flashlight message FLASHLIGHT }")
+					if not loading_save_file then -- Start point collisions can be bugged here
+						SendToConsole("setpos_exact 0.472 442.295 -100") 
+						ModLevitation_SpawnWorkaroundBottlesForJeff()
+					end
+					ent = Entities:FindByName(nil, "introjoke_rus")
+					ent:RedirectOutput("OnSoundFinished", "ModCommon_ShowFlashlightTutorial", ent)
+					-- TODO: Hand covering mouth script required to be here!
+				elseif GetMapName() == "05_pleasantville" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact 868.050 -2345.072 7560") 
+					end
+				elseif GetMapName() == "06_digdeep" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is bugged here
+						SendToConsole("setpos_exact 504.324 -3157.083 631") 
+					end
+					ent = Entities:FindByName(nil, "relay_vort_magic")
+					ent:RedirectOutput("OnTrigger", "ModLevitation_Map6EndingTransition", ent)
+				elseif GetMapName() == "07_sectorx" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then -- Start point is misplaced
+						SendToConsole("setpos_exact 1212.703 -2168.029 -230") 
+						SendToConsole("ent_create env_message { targetname text_vortenergy message VORTENERGY }")
+						ModLevitation_Map7SpawnWorkaroundBattery()
+						ModLevitation_Map7SpawnWorkaroundBattery2()
+						ModLevitation_Map7SpawnWorkaroundJumpStructure()
+					end
+					ent = Entities:FindByName(nil, "airlock_ceilingdevices_start")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "ModLevitation_Map7EnterCombineTrap", ent)
+					end
+					ent = Entities:FindByName(nil, "airlock_ceilingdevices_stop")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "GiveVortEnergy", ent)
+						ent:RedirectOutput("OnTrigger", "ShowVortEnergyTutorial", ent)
+					end
+					if not ent then -- vort powers is already given
+						GiveVortEnergy()
+						ShowVortEnergyTutorial()
+					end
+					ent = Entities:FindByName(nil, "ending") 
+                    ent:RedirectOutput("OnBeginSequence", "ModLevitation_RemoveVortPowers", ent)
+				elseif GetMapName() == "08_burningquestions" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					SendToConsole("r_drawviewmodel 0")
+					if not loading_save_file then -- Start point is misplaced
+						SendToConsole("setpos_exact -465.745 -540.543 -9209") 
+						SendToConsole("ent_create env_message { targetname text_vortenergy message VORTENERGY }")
+					end
+					ent = Entities:FindByName(nil, "end_fight_relay")
+					if ent then
+						ent:RedirectOutput("OnTrigger", "GiveVortEnergy", ent)
+						ent:RedirectOutput("OnTrigger", "ShowVortEnergyTutorial", ent)
+                    end
+					ent2 = Entities:FindByName(nil, "finish_relay")
+					if ent2 then
+						ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent)
+                    end
+					if not ent and ent2 then -- vort powers is already given
+						GiveVortEnergy()
+						ShowVortEnergyTutorial()
+					end
+					ent = Entities:FindByName(nil, "pre_finale_gman")
+                    ent:RedirectOutput("OnTrigger", "ModLevitation_Map8FinaleStopMove", ent)
+				elseif GetMapName() == "red_dust" then
+					--
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("give weapon_shotgun")
+						SendToConsole("give weapon_smg1")
+						SendToConsole("hlvr_addresources 20 60 8 100")
+					end
+				elseif GetMapName() == "back_alley" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("hlvr_addresources 0 0 0 10")
+					end
+					-- ent_fire 91_cfence_relay_disable trigger
+					-- bloodborne_ladder
+					-- ladders
+					-- ending elevator button
+				elseif GetMapName() == "e3_ship" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("give weapon_shotgun")
+						SendToConsole("give weapon_smg1")
+						SendToConsole("hlvr_addresources 20 30 6 10")
+					end
+				elseif GetMapName() == "goldeneye64_damver051" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("give weapon_pistol") -- loadout as map intended
+						SendToConsole("hlvr_addresources 40 0 0 5")
+					else
+						ModGoldenEyeDam1_PlayReplacementAmbient()
+					end
+					ent = Entities:FindByName(nil, "truck_door")
+                    ent:RedirectOutput("OnOpen", "ModGoldenEyeDam1_ShowHintIntro", ent)
+					ent = Entities:FindByName(nil, "truck_door")
+                    ent:RedirectOutput("OnClose", "ModGoldenEyeDam1_PlayReplacementAmbient", ent)
+					ent = Entities:FindByName(nil, "2981_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintObj2", ent)
+					ent = Entities:FindByName(nil, "obj2_powerdown")
+                    ent:RedirectOutput("OnSoundFinished", "ModGoldenEyeDam1_ShowHintObj3", ent)
+					ent = Entities:FindByName(nil, "5043_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintEasterEgg", ent)
+					ent = Entities:FindByName(nil, "5088_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintEasterEggRoom", ent)
+					ent = Entities:FindByName(nil, "easter_egg_door")
+                    ent:RedirectOutput("OnFullyOpen", "ModGoldenEyeDam1_ShowHintEnd", ent)
+					-- player must find a secret button to open easter egg room
+					ent:RedirectOutput("OnLockedUse", "ModGoldenEyeDam1_ShowHintEnd", ent)
+					
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(81, -14, 510), 25)
+					ent:SetEntityName("novr_garage_switch")
+					ent:RedirectOutput("OnCompletionA", "ModGoldenEyeDam1_ShowHintTripmines", ent)
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(155, -202, 976), 25)
+					ent:SetEntityName("novr_tower_switch")
+					ent:RedirectOutput("OnCompletionA", "ModGoldenEyeDam1_ShowHintObj4", ent)
+					
+					Convars:RegisterCommand("novr_goldeneye_dam1_leavecombinegun", function()
+						SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+						SendToConsole("ent_fire 4423_combine_gun_mechanical ClearParent")
+						SendToConsole("ent_fire 4424_combine_gun_mechanical ClearParent")
+						SendToConsole("bind " .. PRIMARY_ATTACK .. " +customattack")
+						local ent = Entities:FindByName(nil, "4423_combine_gun_mechanical")
+						SendToConsole("ent_setpos " .. ent:entindex() .. " -87.649 82.855 493.961")
+						SendToConsole("ent_setang " .. ent:entindex() .. " 14.999 354.999 0")
+						local ent = Entities:FindByName(nil, "4424_combine_gun_mechanical")
+						SendToConsole("ent_setpos " .. ent:entindex() .. " -12.135 -149.014 500.586")
+						SendToConsole("ent_setang " .. ent:entindex() .. " 14.999 84.999 0")
+						SendToConsole("r_drawviewmodel 1")
+					end, "", 0)
+				elseif GetMapName() == "goldeneye64dampart2_ver052_master" then
+					--
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("hidehud 96") -- TODO find intro triggers
+						SendToConsole("hlvr_addresources 40 0 0 0")
+					end
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(-1226, 28, 540), 25)
+					ent:SetEntityName("novr_starthangar_switch")
+					-- TODO replace all generic weapon items!
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(3987, 33, 539), 25)
+					ent:SetEntityName("novr_endhangar_switch")
+				end
 
                 if GetMapName() == "a2_quarantine_entrance" then
                     ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1298 2480 280", ["angles"]="0 22 0", ["modelscale"]=10})
@@ -869,7 +1258,10 @@ if GlobalSys:CommandLineCheck("-novr") then
                         ent:RedirectOutput("OnTrigger", "ResetHideoutPuzzleButtons", ent)
                     end
                 else
-                    SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+                    if isModActive == false then --Default NoVR-mod weapon rule
+						SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+						--SendToConsole("give weapon_shotgun")
+					end
 
                     if GetMapName() == "a2_drainage" then
                         SendToConsole("ent_fire wheel_socket SetScale 4")
@@ -1305,4 +1697,161 @@ if GlobalSys:CommandLineCheck("-novr") then
            return tostring(o)
         end
     end
+	
+	function ModCommon_ShowFlashlightTutorial()
+        SendToConsole("ent_fire text_flashlight ShowMessage")
+        SendToConsole("play play sounds/ui/beepclear.vsnd")
+    end
+	
+	function ModCommon_DisablePlayerActions(a, b)
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModBelomorskaya_EquipFlare(a, b) -- TODO works bad
+		local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+		local viewmodel_ang = viewmodel:GetAngles()
+		local viewmodel_pos = viewmodel:GetAbsOrigin()
+		
+		ent = Entities:FindByName(nil, "flare_01")
+		if ent then
+			ent:SetOrigin(Vector(viewmodel_pos.x + 35, viewmodel_pos.y + 35, viewmodel_pos.z + 35))
+			ent:SetAngles(viewmodel_ang.x, viewmodel_ang.y + 180, viewmodel_ang.z)
+		end
+		DoEntFireByInstanceHandle(ent, "SetParent", "!player", 0, nil, nil)
+		ent = Entities:FindByName(nil, "flare_trigger_01")
+		if ent then
+			ent:Kill()
+		end
+	end
+	
+	function ModBelomorskaya_RemoveFlare(a, b)
+		ent = Entities:FindByName(nil, "flare_01")
+		if ent then
+			ent:Kill()
+		end
+	end
+	
+	function ModLevitation_AllowMovement(a, b)
+		SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+	end
+	
+	function ModLevitation_SpawnWorkaroundBottlesForJeff()
+		SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4415.675 -151"})
+		SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4410.675 -151"})
+	end
+	
+	function ModLevitation_Map5SpawnWorkaroundJumpStructure()
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/tanks/vertical_tank.vmdl", ["origin"]="685.276 -701.073 7780", ["angles"]="0 0 0"})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7720", ["angles"]="0 0 0", ["skin"]=2})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7723", ["angles"]="0 0 180", ["skin"]=2})
+	end
+	
+	function ModLevitation_Map6EndingTransition(a, b)
+		SendToConsole("r_drawviewmodel 0")
+		SendToConsole("hidehud 4")
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundBattery()
+		SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery", ["solid"]=6, ["origin"]="1121.042 -530.784 344"})
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundBattery2()
+		SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery2", ["solid"]=6, ["origin"]="-666.762 493.066 -439.9"})
+	end
+	
+	function ModLevitation_Map7SpawnWorkaroundJumpStructure()
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-264.164 -1015.459 486", ["angles"]="0 0 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-268.164 -1015.459 518.5", ["angles"]="0 21 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-270.164 -1015.459 551", ["angles"]="0 7 0", ["skin"]=0})
+		SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-272.164 -1015.459 583.5", ["angles"]="0 -12 0", ["skin"]=0})
+	end
+	
+	function ModLevitation_Map7EnterCombineTrap()
+        SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_smg1;ent_remove weapon_frag")
+        SendToConsole("r_drawviewmodel 0")
+    end
+	
+	function ModLevitation_RemoveVortPowers(a, b)
+		SendToConsole("bind MOUSE1 \"\"")
+	end
+	
+	function ModLevitation_Map8FinaleStopMove(a, b)
+		SendToConsole("hidehud 4")
+		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+	end
+	
+	-- music is supposed to be played, but it's resource file broken even in VR
+	function ModGoldenEyeDam1_PlayReplacementAmbient(a, b)
+		StartSoundEventFromPosition("Ambient.WindSystem", Entities:GetLocalPlayer():EyePosition())
+	end
+	
+	function ModGoldenEyeDam1_ShowHintIntro(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "This is where your mission begins, Agent Alyx Bond.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+		DoEntFireByInstanceHandle(ent, "SetText", "Objective 1: Find the remote access button to the guard tower bunker.", 4, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 4, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj2(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 2: Enter the bunker and shut down the main power grid.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj3(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 3: Reach the top of the tower and find the switch to the tunnel doors.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj4(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 4: Enter the tunnel and get to the dam.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintTripmines(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Tip: Place the hoppers down as trip mines to set traps for your enemies.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEasterEggRoom(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "You have opened the Secret Room.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEasterEgg(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Tip: GET OUT OF MY ROOM!", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEnd(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Congratulations for beating the level (Insert Playtester Name Here)!", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	if isModActive then
+		-- TODO remove after tests
+		Convars:RegisterCommand("novr_multitool_test", function()
+			local ent = Entities:FindByClassname(nil, "prop_hmd_avatar")
+			if ent then
+				local rightHand = ent:GetVRHand(1)
+				local att = Entities:FindByClassname(nil, "hlvr_multitool")
+				if att then
+					att:SetEntityName("mtool")
+					rightHand:SetHandAttachment(att)
+				end
+			end
+		end, "", 0)
+	end
+	
 end

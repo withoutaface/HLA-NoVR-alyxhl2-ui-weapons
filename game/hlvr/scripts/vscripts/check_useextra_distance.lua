@@ -52,7 +52,9 @@ if thisEntity:Attribute_GetIntValue("picked_up", 0) == 0 then
         thisEntity:SetThink(function()
             local ents = Entities:FindAllInSphere(Entities:GetLocalPlayer():EyePosition(), 120)
             if vlua.find(ents, thisEntity) and player:Attribute_GetIntValue("disable_gg_autopickup", 0) == 0 then
-                DoEntFireByInstanceHandle(thisEntity, "Use", "", 0, player, player)
+                if not WristPockets_PickUpValuableItem(player, thisEntity) then -- regular pickup action
+					DoEntFireByInstanceHandle(thisEntity, "Use", "", 0, player, player)
+				end
                 if class == "item_hlvr_grenade_frag" then
                     DoEntFireByInstanceHandle(thisEntity, "RunScriptFile", "useextra", 0, player, player)
                 end
