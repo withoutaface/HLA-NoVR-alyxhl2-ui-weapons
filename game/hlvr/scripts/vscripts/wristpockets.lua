@@ -9,8 +9,8 @@ WPOCKETS_DROPITEM      = "C"
 -- starts from 1
 local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } 
 
-local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  }
---local itemsStrings = { "$", "^", "*", "<", "'" }
+--local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  }
+local itemsStrings = { "$", "^", "*", "<", "'" }
 -- font:
 -- $ - Health Pen
 -- ^ - Grenade
@@ -18,8 +18,8 @@ local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  }
 -- < - Item (prop_physics) (Is bottle icon correct?)
 -- ' - Health Station Vial
 
-local itemsUniqueStrings = { "[c] Vo", "[c] Ca"  }
---local itemsUniqueStrings = { "<", ">"  }
+--local itemsUniqueStrings = { "[c] Vo", "[c] Ca"  }
+local itemsUniqueStrings = { "<", ">"  }
 -- < - Bottle
 -- > - Keycard
 
