@@ -7,6 +7,7 @@ Mod repository note: due to regular (and huge) NoVR main mod changes, I'm consta
 With this fork of NoVR mod, you will be able to also play & complete next modifications (you can get them from Steam Workshop):
 - ``Levitation`` (campaign, 7 maps + intro)
 - ``Extra-Ordinary Value`` (campaign, 4 maps) 
+- ``GoldenEye Alyx 007 - Dam`` (2 first parts)
 - ``Belomorskaya Station`` (1 map)
 - ``Overcharge`` (1 map)
 - ``Red Dust`` (1 map)
