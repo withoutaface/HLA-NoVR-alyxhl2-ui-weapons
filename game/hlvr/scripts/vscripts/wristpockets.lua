@@ -8,17 +8,30 @@ WPOCKETS_DROPITEM      = "C"
 
 -- starts from 1
 local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } 
-local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  }
-local itemsUniqueStrings = { "[c] Vo", "[c] Ca"  }
+
+--local itemsStrings = { "[z] He", "[x] Gr", "[c] Ba", "[c] It", "[c] Vi"  }
+local itemsStrings = { "$", "^", "*", "<", "'" }
+-- font:
+-- $ - Health Pen
+-- ^ - Grenade
+-- * - Battery, 
+-- < - Item (prop_physics) (Is bottle icon correct?)
+-- ' - Health Station Vial
+
+--local itemsUniqueStrings = { "[c] Vo", "[c] Ca"  }
+local itemsUniqueStrings = { "<", ">"  }
+-- < - Bottle
+-- > - Keycard
+
 -- pocketslots_slot1-2 values: 
 -- 0 - Empty, 1 - Health Pen, 2 - Grenade, 3 - Battery, 4 - Item (prop_physics), 5 - Health Station Vial
 
 function WristPockets_StartupPreparations()
 	SendToConsole("ent_remove text_pocketslots")
-	SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0.2 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.15 y -0.028 }")
+	SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0.2 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.1527 y -0.028 }")
 			
 	SendToConsole("ent_remove text_pocketslots_empty")
-	SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.15 y -0.028 }")
+	SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.1527 y -0.028 }")
 			
 	SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
 	SendToConsole("bind " .. WPOCKETS_USE_HEALTHPEN .. " pocketslots_healthpen") -- use health pen
@@ -134,6 +147,9 @@ function WristPockets_PickUpGrenade(playerEnt, itemEnt)
 		Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
 		print("[WristPockets] Grenade acquired on slot #" .. pocketSlotId .. ".")
 		WristPockets_UpdateHUD()
+		
+		hudHint = SpawnEntityFromTableSynchronous("env_hudhint", { ["targetname"]="pocketslots_hudhint", ["message"]="#HLVR_MainMenu_PhotoMode" })
+        DoEntFireByInstanceHandle(hudHint, "ShowHudHint", "", 0, nil, nil)
 	end
 end
 
