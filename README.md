@@ -1,6 +1,17 @@
 # HLA-NoVR
 NoVR Script for Half-Life: Alyx
 
+Mod repository note: due to regular (and huge) NoVR main mod changes, I'm constantly updating this repo by manually making reset to clear state, and applying all mod support changes again.
+
+## Mod support
+With this fork of NoVR mod, you will be able to also play & complete next modifications (you can get them from Steam Workshop):
+- ``Levitation`` (campaign, 7 maps + intro)
+- ``Extra-Ordinary Value`` (campaign, 4 maps) 
+- ``GoldenEye Alyx 007 - Dam`` (2 first parts)
+- ``Belomorskaya Station`` (1 map)
+- ``Overcharge`` (1 map)
+- ``Red Dust`` (1 map)
+
 ## Installation
 Copy the ``game`` folder into your main Half-Life: Alyx installation folder (e.g. ``C:\Program Files (x86)\Steam\steamapps\common\Half-Life Alyx``).
 
@@ -8,8 +19,6 @@ Copy the ``game`` folder into your main Half-Life: Alyx installation folder (e.g
 Start the game with the launch options ``-novr -vsync``.
 
 You can also get the NoVR Map Edits addon for smoother traversal and less out of bounds glitches: https://steamcommunity.com/sharedfiles/filedetails/?id=2956743603
-
-If you get stuck try to move back or crouch! In case that does not help you can enable noclip with V.
 
 ## Controls
 To change the controls/rebind buttons, edit ``game\hlvr\scripts\vscripts\bindings.lua`` in your main Half-Life: Alyx installation folder.
@@ -39,8 +48,6 @@ M: Main Menu
 P: Pause
 
 V: Noclip (if you get stuck)
-
-C: Console
 
 ## Official Discord Server
 https://discord.gg/AyfBeuZXsR
