@@ -575,10 +575,6 @@ if GlobalSys:CommandLineCheck("-novr") then
 			if GetMapName() == "goldeneye64_damver051" then
 				if vlua.find(Entities:FindAllInSphere(Vector(-831,-138,121), 8), player) then -- 1
 					ClimbLadder(260)
---				elseif vlua.find(Entities:FindAllInSphere(Vector(158,216,-8960), 10), player) then
---					ClimbLadderSound()
---					SendToConsole("fadein 0.2")
---					SendToConsole("setpos_exact 159.402 252.582 -9184") 
 				end
 			end
 			
@@ -1086,11 +1082,46 @@ if GlobalSys:CommandLineCheck("-novr") then
 					if not loading_save_file then
 						SendToConsole("give weapon_pistol") -- loadout as map intended
 						SendToConsole("hlvr_addresources 40 0 0 5")
+					else
+						ModGoldenEyeDam1_PlayReplacementAmbient()
 					end
+					ent = Entities:FindByName(nil, "truck_door")
+                    ent:RedirectOutput("OnOpen", "ModGoldenEyeDam1_ShowHintIntro", ent)
+					ent = Entities:FindByName(nil, "truck_door")
+                    ent:RedirectOutput("OnClose", "ModGoldenEyeDam1_PlayReplacementAmbient", ent)
+					ent = Entities:FindByName(nil, "2981_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintObj2", ent)
+					ent = Entities:FindByName(nil, "obj2_powerdown")
+                    ent:RedirectOutput("OnSoundFinished", "ModGoldenEyeDam1_ShowHintObj3", ent)
+					ent = Entities:FindByName(nil, "5043_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintEasterEgg", ent)
+					ent = Entities:FindByName(nil, "5088_button_center_pusher")
+                    ent:RedirectOutput("OnIn", "ModGoldenEyeDam1_ShowHintEasterEggRoom", ent)
+					ent = Entities:FindByName(nil, "easter_egg_door")
+                    ent:RedirectOutput("OnFullyOpen", "ModGoldenEyeDam1_ShowHintEnd", ent)
+					-- player must find a secret button to open easter egg room
+					ent:RedirectOutput("OnLockedUse", "ModGoldenEyeDam1_ShowHintEnd", ent)
+					
 					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(81, -14, 510), 25)
 					ent:SetEntityName("novr_garage_switch")
+					ent:RedirectOutput("OnCompletionA", "ModGoldenEyeDam1_ShowHintTripmines", ent)
 					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(155, -202, 976), 25)
 					ent:SetEntityName("novr_tower_switch")
+					ent:RedirectOutput("OnCompletionA", "ModGoldenEyeDam1_ShowHintObj4", ent)
+					
+					Convars:RegisterCommand("novr_goldeneye_dam1_leavecombinegun", function()
+						SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+						SendToConsole("ent_fire 4423_combine_gun_mechanical ClearParent")
+						SendToConsole("ent_fire 4424_combine_gun_mechanical ClearParent")
+						SendToConsole("bind " .. PRIMARY_ATTACK .. " +customattack")
+						local ent = Entities:FindByName(nil, "4423_combine_gun_mechanical")
+						SendToConsole("ent_setpos " .. ent:entindex() .. " -87.649 82.855 493.961")
+						SendToConsole("ent_setang " .. ent:entindex() .. " 14.999 354.999 0")
+						local ent = Entities:FindByName(nil, "4424_combine_gun_mechanical")
+						SendToConsole("ent_setpos " .. ent:entindex() .. " -12.135 -149.014 500.586")
+						SendToConsole("ent_setang " .. ent:entindex() .. " 14.999 84.999 0")
+						SendToConsole("r_drawviewmodel 1")
+					end, "", 0)
 				elseif GetMapName() == "goldeneye64dampart2_ver052_master" then
 					isModActive = true
 					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
@@ -1587,19 +1618,62 @@ if GlobalSys:CommandLineCheck("-novr") then
 		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
 	end
 	
-	if isModActive then
-		Convars:RegisterCommand("novr_goldeneye_dam1_leavecombinegun", function()
-			SendToConsole("ent_fire player_speedmod ModifySpeed 1")
-			SendToConsole("ent_fire 4423_combine_gun_mechanical ClearParent")
-			SendToConsole("ent_fire 4424_combine_gun_mechanical ClearParent")
-			SendToConsole("bind " .. PRIMARY_ATTACK .. " +customattack")
-			local ent = Entities:FindByName(nil, "4423_combine_gun_mechanical")
-			SendToConsole("ent_setpos " .. ent:entindex() .. " -87.649 82.855 493.961")
-			local ent = Entities:FindByName(nil, "4424_combine_gun_mechanical")
-			SendToConsole("ent_setpos " .. ent:entindex() .. " -12.135 -149.014 500.586")
-			SendToConsole("r_drawviewmodel 1")
-		end, "", 0)
+	-- music is supposed to be played, but it's resource file broken even in VR
+	function ModGoldenEyeDam1_PlayReplacementAmbient(a, b)
+		StartSoundEventFromPosition("Ambient.WindSystem", Entities:GetLocalPlayer():EyePosition())
+	end
 	
+	function ModGoldenEyeDam1_ShowHintIntro(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "This is where your mission begins, Agent Alyx Bond.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+		DoEntFireByInstanceHandle(ent, "SetText", "Objective 1: Find the remote access button to the guard tower bunker.", 4, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 4, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj2(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 2: Enter the bunker and shut down the main power grid.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj3(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 3: Reach the top of the tower and find the switch to the tunnel doors.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintObj4(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Objective 4: Enter the tunnel and get to the dam.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintTripmines(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Tip: Place the hoppers down as trip mines to set traps for your enemies.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEasterEggRoom(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "You have opened the Secret Room.", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEasterEgg(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Tip: GET OUT OF MY ROOM!", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	function ModGoldenEyeDam1_ShowHintEnd(a, b)
+		ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+        DoEntFireByInstanceHandle(ent, "SetText", "Congratulations for beating the level (Insert Playtester Name Here)!", 0, nil, nil)
+        DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+	end
+	
+	if isModActive then
 		-- TODO remove after tests
 		Convars:RegisterCommand("novr_multitool_test", function()
 			local ent = Entities:FindByClassname(nil, "prop_hmd_avatar")

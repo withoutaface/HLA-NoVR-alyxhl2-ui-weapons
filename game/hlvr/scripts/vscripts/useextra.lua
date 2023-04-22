@@ -1225,6 +1225,14 @@ if map == "goldeneye64_damver051" then
 			thisEntity:Attribute_SetIntValue("used", 1)
 		end
 	end
+	if name == "5088_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 5088_button_center_pusher onin")
+    end
+	if name == "5043_button_pusher_prop" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+        SendToConsole("ent_fire_output 5043_button_center_pusher onin")
+    end
 end
 if map == "goldeneye64dampart2_ver052_master" then
 	if class == "item_hlvr_weapon_generic_pistol" then
