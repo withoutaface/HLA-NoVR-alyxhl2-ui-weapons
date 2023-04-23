@@ -1060,6 +1060,19 @@ if class == "item_hlvr_headcrab_gland" then
     SendToConsole("ent_fire achievement_squeeze_heart FireEvent")
 end
 
+-- Common mod stuff
+if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
+	local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 5)
+    if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
+		DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
+        ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
+        ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 1.8)
+		ent:FireOutput("OnHackSuccessAnimationComplete", nil, nil, nil, 1.8)
+		DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
+		--StartSoundEventFromPosition("HackingPuzzle.TripmineSuccess", player:EyePosition())
+		ent:Attribute_SetIntValue("used", 1)
+    end
+end	
 -- Mod support for Extra-Ordinary Value
 if map == "youreawake" then
 	if name == "1931_headset" then 
@@ -1068,26 +1081,7 @@ if map == "youreawake" then
 		SendToConsole("ent_fire 1931_headset kill")
 	end	
 end
-if map == "seweroutskirts" then
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 20)
-        if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
-			DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
-            ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
-            ent:FireOutput("OnPuzzleSuccess", nil, nil, nil, 1.8)
-			ent:FireOutput("OnHackSuccessAnimationComplete", nil, nil, nil, 1.8)
-			DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
-			ent:Attribute_SetIntValue("used", 1)
-        end
-		--StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-	end	
-end
 if map == "facilityredux" then
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
-	end	
 	if name == "2461_inside_elevator_button" then -- UseElevator
 		SendToConsole("ent_fire 2461_elev_button_elevator press")
 	end
@@ -1103,11 +1097,6 @@ if map == "helloagain" then
 	if name == "" and class == "info_hlvr_holo_hacking_plug" then -- Generic hack plug unlock
 		thisEntity:FireOutput("OnHackSuccess", nil, nil, nil, 0)
 	end
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
-	end	
 	if name == "393_elev_button_elevator" then -- UseElevatorButton
 		SendToConsole("ent_fire 393_elev_button_elevator press")
 	end
@@ -1262,11 +1251,6 @@ if map == "05_pleasantville" then
 	if name == "15708_prop_button" then 
 		SendToConsole("ent_fire_output 15708_handpose_combine_switchbox_button_press OnHandPosed")
 	end	
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
-	end	
 	if name == "29473_button_pusher_prop" then -- PushWaterBottlesButton
         SendToConsole("ent_fire_output 29473_button_center_pusher onin")
     end
@@ -1274,6 +1258,7 @@ if map == "05_pleasantville" then
 		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
         SendToConsole("ent_fire_output 29494_button_center_pusher onin")
     end
+	-- TODO broken with one of NoVR updates
 	if name == "32803_antlion_plug_crank_a" then
         SendToConsole("ent_fire_output 32803_antlion_plug_crank_a oncompletionc_forward")
     end
@@ -1294,11 +1279,6 @@ if map == "05_pleasantville" then
     end
 end
 if map == "06_digdeep" then
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
-	end	
 	if name == "28212_button_pusher_prop" then -- PushElevatorButton
 		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
         SendToConsole("ent_fire_output 28212_button_center_pusher onin")
@@ -1316,11 +1296,6 @@ if map == "06_digdeep" then
 	end
 end
 if map == "07_sectorx" then
-	if model == "models/weapons/vr_tripmine/tripmine.vmdl" then 
-		StartSoundEventFromPosition("HackingPlug.Connect", player:EyePosition())
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onpuzzlesuccess")
-		SendToConsole("ent_fire_output *_tripmine_hacking_plug onhacksuccessanimationcomplete")
-	end	
 	if name == "novr_workaround_battery" then -- PlayerTakeNoVRBattery
 		SendToConsole("ent_fire 8621_powerunit_relay_reviver_removed trigger")
 	end

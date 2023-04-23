@@ -98,6 +98,14 @@ local function ErasePocketSlot(playerEnt, itemSlot)
 	end 
 end
 
+local function PrecacheModels()
+    local ent_table = { -- used solution by SoMNst & Epic
+        targetname = "novr_precachemodels",
+		vscripts = "wristpockets_precache.lua"
+    }
+	SpawnEntityFromTableAsynchronous("logic_script", ent_table, nil, nil);
+end
+
 function WristPockets_CheckPocketItemsOnLoading(playerEnt, saveLoading)
 	if playerEnt:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 or playerEnt:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
 		if not saveLoading then -- erase teleported items on level change
@@ -106,6 +114,7 @@ function WristPockets_CheckPocketItemsOnLoading(playerEnt, saveLoading)
 		end
 		WristPockets_UpdateHUD()
 	end -- on first appear, icons can be too bold because of antialiasing bug
+	PrecacheModels()
 end
 
 -- use slot 2 first, it comes as upper slot on HUD
@@ -161,7 +170,7 @@ function WristPockets_PickUpValuableItem(playerEnt, itemEnt)
 	local itemModel = itemEnt:GetModelName()
 	if itemClass == "item_hlvr_prop_battery" or itemModel == "models/props/misc/keycard_001.vmdl" or itemModel == "models/props/distillery/bottle_vodka.vmdl" or itemClass == "item_hlvr_health_station_vial" then
 		local itemId = 0
-		if itemClass == "item_hlvr_prop_battery" then
+		if itemClass == "item_hlvr_prop_battery" then -- TODO add prop_reviver_heart
 			itemId = 3
 		elseif itemClass == "prop_physics" then -- generic quest item
 			itemId = 4
