@@ -1858,17 +1858,4 @@ if GlobalSys:CommandLineCheck("-novr") then
 		end, "", 0)
 	end
 	
-	--Fix for getting wrist pockets icons to show on initial load of map
-	function pockets_start_kick()
-		WristPockets_UpdateHUD()
-		print("pockets_start_kick fired")
-	end
-
-	Convars:RegisterCommand("pockets_start_kick" , function()
-		pockets_start_kick()
-	end, "pockets_start_kick", 0)
-	
-	if GetMapName() ~= "startup" then
-		SendToConsole("pockets_start_kick")
-	end
 end

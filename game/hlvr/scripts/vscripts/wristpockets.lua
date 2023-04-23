@@ -27,12 +27,16 @@ local itemsUniqueStrings = { "<", ">"  }
 -- 0 - Empty, 1 - Health Pen, 2 - Grenade, 3 - Battery, 4 - Item (prop_physics), 5 - Health Station Vial
 
 function WristPockets_StartupPreparations()
-	SendToConsole("ent_remove text_pocketslots")
-	SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0.2 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.1527 y -0.028 }")
-			
-	SendToConsole("ent_remove text_pocketslots_empty")
-	SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.1527 y -0.028 }")
-			
+	local text = Entities:FindByName(nil, "text_pocketslots")
+	if not text then
+		SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.1527 y -0.028 }")
+	end
+	local textEmpty = Entities:FindByName(nil, "text_pocketslots_empty")
+	if not textEmpty then
+		SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.1527 y -0.028 }")
+	end -- game cannot display newly recreated game_text on map bootup, so keep it
+	-- and fade-in fx stops working, so disable it too
+
 	SendToConsole("sk_max_grenade 1") -- force only 1 grenade on hands
 	SendToConsole("bind " .. WPOCKETS_USE_HEALTHPEN .. " pocketslots_healthpen") -- use health pen
 	SendToConsole("bind " .. WPOCKETS_USE_GRENADE .. " pocketslots_grenade") -- add HL2 grenade as a weapon
@@ -94,15 +98,23 @@ local function ErasePocketSlot(playerEnt, itemSlot)
 	end 
 end
 
+local function PrecacheModels()
+    local ent_table = { -- used solution by SoMNst & Epic
+        targetname = "novr_precachemodels",
+		vscripts = "wristpockets_precache.lua"
+    }
+	SpawnEntityFromTableAsynchronous("logic_script", ent_table, nil, nil);
+end
+
 function WristPockets_CheckPocketItemsOnLoading(playerEnt, saveLoading)
 	if playerEnt:Attribute_GetIntValue("pocketslots_slot1", 0) ~= 0 or playerEnt:Attribute_GetIntValue("pocketslots_slot2", 0) ~= 0 then
 		if not saveLoading then -- erase teleported items on level change
 			ErasePocketSlot(playerEnt, 1)
 			ErasePocketSlot(playerEnt, 2)
 		end
-		--local tempPocketSlotsMsgEnt = SpawnEntityFromTableSynchronous("game_text", { ["targetname"]="text_pocketslots", ["effect"]=0, ["spawnflags"]=1, ["color"]="255 220 0", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0, ["channel"]=4, ["fxtime"]=0, ["holdtime"]=9999, ["x"]=0.15, ["y"]=-0.028 } ) -- awful trick to avoid error on map start
 		WristPockets_UpdateHUD()
-	end -- TODO display slots after level boots, somehow it doesn't work
+	end -- on first appear, icons can be too bold because of antialiasing bug
+	PrecacheModels()
 end
 
 -- use slot 2 first, it comes as upper slot on HUD
@@ -133,7 +145,7 @@ function WristPockets_PickUpHealthPen(playerEnt, itemEnt)
 		playerEnt:Attribute_SetIntValue("pocketslots_slot" .. pocketSlotId .. "", 1)
 		Storage:SaveBoolean("pocketslots_slot" .. pocketSlotId .. "_keepacrossmaps", true)
 		print("[WristPockets] Health pen acquired on slot #" .. pocketSlotId .. ".")
-		WristPockets_UpdateHUD()
+		WristPockets_UpdateHUD() -- TODO fails to display on map change
 	end
 end
 
@@ -158,7 +170,7 @@ function WristPockets_PickUpValuableItem(playerEnt, itemEnt)
 	local itemModel = itemEnt:GetModelName()
 	if itemClass == "item_hlvr_prop_battery" or itemModel == "models/props/misc/keycard_001.vmdl" or itemModel == "models/props/distillery/bottle_vodka.vmdl" or itemClass == "item_hlvr_health_station_vial" then
 		local itemId = 0
-		if itemClass == "item_hlvr_prop_battery" then
+		if itemClass == "item_hlvr_prop_battery" then -- TODO add prop_reviver_heart
 			itemId = 3
 		elseif itemClass == "prop_physics" then -- generic quest item
 			itemId = 4
