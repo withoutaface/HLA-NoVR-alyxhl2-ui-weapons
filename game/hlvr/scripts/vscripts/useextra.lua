@@ -225,9 +225,10 @@ if not vlua.find(model, "doorhandle") and name ~= "@pod_shell" and name ~= "589_
                 SendToConsole("ent_fire barricade_door SetReturnToCompletionStyle 0")
             end
             if name == "12712_shotgun_wheel" then
-                local bar = Entities:FindByName(nil, "12712_shotgun_bar_for_wheel")
-                bar:SetOrigin(Vector(711.395874, 1319.248047, -168.302490))
-                bar:SetAngles(0.087952, 120.220528, 90.588112)
+                local bar = SpawnEntityFromTableSynchronous("prop_dynamic_override", {["model"]="models/props/misc_debris/vort_winch_pipe.vmdl", ["origin"]="711.395874 1319.248047 -168.302490", ["angles"]="0.087952 120.220528 90.588112"})
+                bar = Entities:FindByName(nil, "12712_shotgun_bar_for_wheel")
+                bar:Kill()
+                SendToConsole("ent_remove shotgun_pickup_blocker")
             end
             return nil
         else
@@ -257,7 +258,7 @@ end
 
 if vlua.find(name, "socket") then
     local ent = Entities:FindByClassname(thisEntity, "prop_physics") 
-    DoEntFireByInstanceHandle(ent, "Use", "", 0, player, player)
+    DoEntFireByInstanceHandle(ent, "RunScriptFile", "check_useextra_distance", 0, player, player)
 end
 
 if class == "prop_ragdoll" or class == "prop_ragdoll_attached" then
@@ -293,10 +294,18 @@ elseif vlua.find(name, "_portaloo_seat") then
         thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,2000,0))
     end
 elseif vlua.find(name, "_drawer_") then
-    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
-        thisEntity:ApplyAbsVelocityImpulse(-thisEntity:GetForwardVector() * 100)
+    if vlua.find(model, "models/props/desk_1_drawer_") then
+        if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+            thisEntity:ApplyAbsVelocityImpulse(-thisEntity:GetRightVector() * 100)
+        else
+            thisEntity:ApplyAbsVelocityImpulse(thisEntity:GetRightVector() * 100)
+        end
     else
-        thisEntity:ApplyAbsVelocityImpulse(thisEntity:GetForwardVector() * 100)
+        if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+            thisEntity:ApplyAbsVelocityImpulse(-thisEntity:GetForwardVector() * 100)
+        else
+            thisEntity:ApplyAbsVelocityImpulse(thisEntity:GetForwardVector() * 100)
+        end
     end
 elseif vlua.find(name, "_trashbin02_lid") then
     if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
@@ -337,11 +346,23 @@ if name == "205_8032_button_pusher_prop" then
     SendToConsole("ent_fire debug_elevator_relay trigger")
 end
 
+if model == "models/props/eli_manor/antique_globe01a.vmdl" then
+    thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,1000))
+end
+
 if model == "models/props/interactive/washing_machine01a_door.vmdl" then
     if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
         thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,2000))
     else
         thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,-2000))
+    end
+end
+
+if model == "models/props/interactive/washing_machine01a_loader.vmdl" then
+    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+        thisEntity:ApplyAbsVelocityImpulse(-thisEntity:GetForwardVector() * 100)
+    else
+        thisEntity:ApplyAbsVelocityImpulse(thisEntity:GetForwardVector() * 100)
     end
 end
 
@@ -386,6 +407,14 @@ if name == "russell_entry_window" then
     SendToConsole("fadein 0.2")
     SendToConsole("ent_fire russell_entry_window SetCompletionValue 1")
     SendToConsole("setpos -1728 275 100")
+end
+
+if vlua.find(model, "models/props/interior_furniture/interior_furniture_cabinet_002_door_") then
+    if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,-2000))
+    else
+        thisEntity:ApplyLocalAngularVelocityImpulse(Vector(0,0,2000))
+    end
 end
 
 if model == "models/props/fridge_1a_door2.vmdl" or model == "models/props/fridge_1a_door.vmdl" then
@@ -520,22 +549,30 @@ end
 if class == "item_hlvr_weapon_shotgun" then
     SendToConsole("give weapon_shotgun")
     SendToConsole("ent_fire 12712_relay_player_shotgun_is_ready Trigger")
-    thisEntity:Kill()
+    SendToConsole("ent_fire item_hlvr_weapon_shotgun Kill")
 end
 
 if class == "item_hlvr_weapon_rapidfire" then
     SendToConsole("give weapon_ar2")
-    thisEntity:Kill()
+    local ent = Entities:FindByClassnameNearest("item_hlvr_clip_rapidfire", thisEntity:GetCenter(), 20)
+    DoEntFireByInstanceHandle(ent, "RunScriptFile", "useextra", 0, player, player)
+    ent = Entities:FindByClassnameNearest("item_hlvr_clip_rapidfire", thisEntity:GetCenter(), 20)
+    DoEntFireByInstanceHandle(ent, "RunScriptFile", "useextra", 0, player, player)
+    SendToConsole("ent_fire item_hlvr_weapon_rapidfire Kill")
 end
 
 if class == "prop_dynamic" then
     if model == "models/props_combine/health_charger/combine_health_charger_vr_pad.vmdl" then
         local ent = Entities:FindByClassnameNearest("item_health_station_charger", thisEntity:GetOrigin(), 20)
         DoEntFireByInstanceHandle(ent, "RunScriptFile", "useextra", 0, nil, nil)
-        if tostring(thisEntity:GetMaterialGroupMask()) == "5" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+        ent = Entities:FindByClassnameNearest("item_healthcharger_internals", thisEntity:GetOrigin(), 20)
+        if ent:GetSequence() == "idle_deployed" and tostring(thisEntity:GetMaterialGroupMask()) == "5" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             if player:GetHealth() == player:GetMaxHealth() then
                 StartSoundEvent("HealthStation.Deny", player)
             else
+                if map == "a2_quarantine_entrance" then
+                    SendToConsole("ent_fire_output health_station OnHealingPlayerStart")
+                end
                 StartSoundEvent("HealthStation.Start", player)
                 SendToConsole("ent_fire player_speedmod ModifySpeed 0")
                 thisEntity:Attribute_SetIntValue("used", 1)
@@ -547,6 +584,9 @@ if class == "prop_dynamic" then
                         player:SetHealth(player:GetHealth() + 1)
                         return 0.1
                     else
+                        if map == "a2_quarantine_entrance" then
+                            SendToConsole("ent_fire_output health_station OnHealingPlayerStop")
+                        end
                         StopSoundEvent("HealthStation.Loop", player)
                         StartSoundEvent("HealthStation.Complete", player)
                         thisEntity:StopThink("Loop")
@@ -869,9 +909,13 @@ if map == "a4_c17_parking_garage" then
 end
 
 if map == "a2_train_yard" then
-    if class == "item_hlvr_combine_console_rack" and Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)[2]:GetCycle() == 1 then
-        local ent = Entities:FindByName(nil, "5325_3947_combine_console")
-        DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
+    local ents = Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)
+    for i = 1, #ents do
+        local ent = ents[i]
+        if ent:GetModelName() == "models/props_combine/combine_consoles/handle_plate.vmdl" and ent:GetCycle() == 1 then
+            local ent = Entities:FindByName(nil, "5325_3947_combine_console")
+            DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
+        end
     end
 end
 
@@ -890,9 +934,13 @@ if map == "a2_headcrabs_tunnel" then
 end
 
 if map == "a2_quarantine_entrance" then
-    if class == "item_hlvr_combine_console_rack" and Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)[2]:GetCycle() == 1 then
-        local ent = Entities:FindByName(nil, "17670_combine_console")
-        DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
+    local ents = Entities:FindAllByClassnameWithin("baseanimating", thisEntity:GetCenter(), 3)
+    for i = 1, #ents do
+        local ent = ents[i]
+        if ent:GetModelName() == "models/props_combine/combine_consoles/handle_plate.vmdl" and ent:GetCycle() == 1 then
+            local ent = Entities:FindByName(nil, "17670_combine_console")
+            DoEntFireByInstanceHandle(ent, "RackOpening", "1", 0, thisEntity, thisEntity)
+        end
     end
     
     if name == "27788_combine_locker" then

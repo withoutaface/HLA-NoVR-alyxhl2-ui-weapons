@@ -68,10 +68,13 @@ if GlobalSys:CommandLineCheck("-novr") then
     end
 
     pickup_ev = ListenToGameEvent('physgun_pickup', function(info)
+        local player = Entities:GetLocalPlayer()
+        player:Attribute_SetIntValue("disable_gg_autopickup", 1)
+        player:SetThink(function()
+            player:Attribute_SetIntValue("disable_gg_autopickup", 0)
+            player:Attribute_SetIntValue("disable_gg", 0)
+        end, "EnableGG", 0.45)
         local ent = EntIndexToHScript(info.entindex)
-        if VectorDistanceSq(ent:GetCenter(), player:EyePosition()) > 4000 then
-            ent:SetOrigin(player:EyePosition() + player:GetForwardVector() * 40 + (ent:GetOrigin() - ent:GetCenter()))
-        end
         local child = ent:GetChildren()[1]
         if child and child:GetClassname() == "prop_dynamic" then
             child:SetEntityName("held_prop_dynamic_override")
@@ -400,10 +403,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                 end
             end
 
-            if GetMapName() == "a2_headcrabs_tunnel" and vlua.find(Entities:FindAllInSphere(Vector(347,-242,-63), 20), player) then
-                ClimbLadderSound()
-                SendToConsole("fadein 0.2")
-                SendToConsole("setpos_exact 347 -297 2")
+            if GetMapName() == "a2_headcrabs_tunnel" and vlua.find(Entities:FindAllInSphere(Vector(348, -252, -62), 10), player) then
+                ClimbLadder(22)
             end
 
             if GetMapName() == "a2_hideout" then
@@ -421,8 +422,9 @@ if GlobalSys:CommandLineCheck("-novr") then
                 if traceTable.hit 
                 then
                     local ent = Entities:FindByClassnameNearest("func_physical_button", traceTable.pos, 10)
-                    if ent then
+                    if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
                         ent:FireOutput("OnIn", nil, nil, nil, 0)
+                        ent:Attribute_SetIntValue("used", 1)
                         StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
                     end
                 end
@@ -570,6 +572,7 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("ent_fire *_hazmat_crate_lid DisablePickup")
             SendToConsole("ent_fire electrical_panel_*_door* DisablePickup")
             SendToConsole("ent_fire *_washing_machine_door DisablePickup")
+            SendToConsole("ent_fire *_washing_machine_loader DisablePickup")
             SendToConsole("ent_fire *_fridge_door_* DisablePickup")
             SendToConsole("ent_fire *_mailbox_*_door_* DisablePickup")
             SendToConsole("ent_fire *_dumpster_lid DisablePickup")
@@ -580,6 +583,9 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("ent_fire *_car_door_rear DisablePickup")
             SendToConsole("ent_fire *_antenna_* DisablePickup")
             SendToConsole("ent_fire ticktacktoe_* DisablePickup")
+            SendToConsole("ent_fire *_antique_globe DisablePickup")
+            SendToConsole("ent_fire *_door1 DisablePickup")
+            SendToConsole("ent_fire *_door2 DisablePickup")
             SendToConsole("ent_remove player_flashlight")
             SendToConsole("hl_headcrab_deliberate_miss_chance 0")
             SendToConsole("headcrab_powered_ragdoll 0")
@@ -598,8 +604,8 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("sk_plr_dmg_pistol 7")
             SendToConsole("sk_plr_dmg_ar2 9")
             SendToConsole("sk_plr_dmg_smg1 5")
-            SendToConsole("player_use_radius 60")
-            SendToConsole("hlvr_physcannon_forward_offset -8")
+            --SendToConsole("player_use_radius 60")
+            SendToConsole("hlvr_physcannon_forward_offset -5")
             -- TODO: Lower this when picking up very low mass objects
             SendToConsole("player_throwforce 500")
 
@@ -641,6 +647,7 @@ if GlobalSys:CommandLineCheck("-novr") then
                     "models/industrial/industrial_chemical_barrel_02.vmdl",
                     "models/props/barrel_plastic_1.vmdl",
                     "models/props/barrel_plastic_1_open.vmdl",
+                    "models/props_c17/oildrum001_explosive.vmdl",
                 }
                 ent = Entities:FindByClassname(nil, "prop_physics")
                 while ent do
@@ -676,6 +683,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                 ent:SetThink(function()
                     local viewmodel = Entities:FindByClassname(nil, "viewmodel")
                     local player = Entities:GetLocalPlayer()
+
+                    cvar_setf("player_use_radius", min(2200/abs(player:GetAngles().x),60))
 
                     if move_delta ~= Vector(0, 0, 0) then
                         table.insert(unstuck_table, player:GetOrigin())
@@ -775,6 +784,9 @@ if GlobalSys:CommandLineCheck("-novr") then
                     DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
                     SendToConsole("ent_create env_message { targetname text_crouchjump message CROUCHJUMP }")
                     SendToConsole("ent_create env_message { targetname text_sprint message SPRINT }")
+                    SendToConsole("ent_create env_message { targetname text_gg message GRAVITYGLOVES }")
+
+                    SendToConsole("ent_fire russell_entry_window SetCompletionValue 0.4")
                 end
 
                 ent = Entities:GetLocalPlayer()
@@ -799,6 +811,9 @@ if GlobalSys:CommandLineCheck("-novr") then
                     ent = Entities:FindByName(nil, "trigger_post_gate")
                     ent:RedirectOutput("OnTrigger", "ShowSprintTutorial", ent)
 
+                    ent = Entities:FindByName(nil, "gg_training_start_trigger")
+                    ent:RedirectOutput("OnTrigger", "ShowGravityGlovesTutorial", ent)
+
                     ent = Entities:FindByName(nil, "gate_ammo_trigger")
                     local origin = ent:GetOrigin()
                     local angles = ent:GetAngles()
@@ -820,6 +835,9 @@ if GlobalSys:CommandLineCheck("-novr") then
                 Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 1)
 
                 if GetMapName() == "a2_quarantine_entrance" then
+                    ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1298 2480 280", ["angles"]="0 22 0", ["modelscale"]=10})
+                    ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1100 2180 280", ["angles"]="0 22 0", ["modelscale"]=10})
+                    ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1312 2504 280", ["angles"]="0 -67 0", ["modelscale"]=2})
                     -- Default Junction Rotations
                     Entities:FindByName(nil, "toner_junction_1"):Attribute_SetIntValue("junction_rotation", 1)
                     Entities:FindByName(nil, "toner_junction_2"):Attribute_SetIntValue("junction_rotation", 3)
@@ -838,21 +856,34 @@ if GlobalSys:CommandLineCheck("-novr") then
                     if not loading_save_file then
                         ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="CHAPTER3_TITLE"})
                         DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
+
+                        ent = SpawnEntityFromTableSynchronous("prop_physics_override", {["targetname"]="shotgun_pickup_blocker", ["CollisionGroupOverride"]=5, ["renderamt"]=0, ["model"]="models/hacking/holo_hacking_sphere_prop.vmdl", ["origin"]="605.122 1397.567 -32.079", ["modelscale"]=2})
+                        ent:SetParent(Entities:FindByName(nil, "12712_hanging_shotgun_zombie"), "hand_r")
                     end
 
                     ent = Entities:GetLocalPlayer()
                     if ent:Attribute_GetIntValue("has_flashlight", 0) == 1 then
                         SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
                     end
-                elseif GetMapName() ~= "a2_hideout" then
+                elseif GetMapName() == "a2_hideout" then
+                    if not loading_save_file then
+                        ent = Entities:FindByName(nil, "8271_button_counter")
+                        ent:RedirectOutput("OnHitMax", "DisableHideoutPuzzleButtons", ent)
+
+                        ent = Entities:FindByName(nil, "8271_relay_reset_buttons")
+                        ent:RedirectOutput("OnTrigger", "ResetHideoutPuzzleButtons", ent)
+                    end
+                else
                     SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 
                     if GetMapName() == "a2_drainage" then
-                        SendToConsole("ent_fire wheel_socket SetScale 4")
-                        SendToConsole("ent_fire wheel2_socket SetScale 4")
-                        SendToConsole("ent_fire wheel_physics DisablePickup")
-                        ent = Entities:FindByClassnameNearest("npc_barnacle", Vector(941, -1666, 255), 10)
-                        DoEntFireByInstanceHandle(ent, "AddOutput", "OnRelease>wheel_physics>EnablePickup>>0>1", 0, nil, nil)
+                        if not loading_save_file then
+                            SendToConsole("ent_fire math_count_wheel2_installment addoutput \"OnChangedFromMin>relay_install_wheel2>Trigger>>0>1\"")
+                            SendToConsole("ent_fire math_count_wheel_installment addoutput \"OnChangedFromMin>relay_install_wheel>Trigger>>0>1\"")
+                            SendToConsole("ent_fire wheel_physics DisablePickup")
+                            ent = Entities:FindByClassnameNearest("npc_barnacle", Vector(941, -1666, 255), 10)
+                            DoEntFireByInstanceHandle(ent, "AddOutput", "OnRelease>wheel_physics>EnablePickup>>0>1", 0, nil, nil)
+                        end
                     elseif GetMapName() == "a2_train_yard" then
                         if not loading_save_file then
                             ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1080 3200 -350", ["angles"]="0 12 0", ["modelscale"]=5, ["targetname"]="elipreventfall"})
@@ -1025,7 +1056,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 
     function GetOutOfCrashedVan(a, b)
         SendToConsole("fadein 0.2")
-        SendToConsole("setpos_exact -1408 2307 -104")
+        SendToConsole("setpos_exact -1408 2307 -114")
         SendToConsole("ent_fire 4962_car_door_left_front open")
     end
 
@@ -1044,6 +1075,24 @@ if GlobalSys:CommandLineCheck("-novr") then
         SendToConsole("r_drawviewmodel 1")
         SendToConsole("ent_fire item_hlvr_weapon_energygun kill")
         Entities:GetLocalPlayer():Attribute_SetIntValue("pistol", 1)
+    end
+
+    function DisableHideoutPuzzleButtons(a, b)
+        ent = Entities:FindByClassname(nil, "func_physical_button")
+        while ent do
+            ent:Attribute_SetIntValue("used", 1)
+            ent = Entities:FindByClassname(ent, "func_physical_button")
+        end
+    end
+
+    function ResetHideoutPuzzleButtons(a, b)
+        ent = Entities:FindByClassname(nil, "func_physical_button")
+        ent:SetThink(function()
+            while ent do
+                ent:Attribute_SetIntValue("used", 0)
+                ent = Entities:FindByClassname(ent, "func_physical_button")
+            end
+        end, "", 3)
     end
 
     function RemoveEliPreventFall(a, b)
@@ -1121,6 +1170,11 @@ if GlobalSys:CommandLineCheck("-novr") then
 
     function ShowSprintTutorial()
         SendToConsole("ent_fire text_sprint ShowMessage")
+        SendToConsole("play sounds/ui/beepclear.vsnd")
+    end
+
+    function ShowGravityGlovesTutorial()
+        SendToConsole("ent_fire text_gg ShowMessage")
         SendToConsole("play sounds/ui/beepclear.vsnd")
     end
 
