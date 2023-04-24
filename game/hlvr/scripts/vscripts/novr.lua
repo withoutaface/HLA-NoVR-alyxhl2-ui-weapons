@@ -76,7 +76,7 @@ if GlobalSys:CommandLineCheck("-novr") then
         player:Attribute_SetIntValue("disable_gg_autopickup", 1)
         player:SetThink(function()
             player:Attribute_SetIntValue("disable_gg_autopickup", 0)
-			player:Attribute_SetIntValue("disable_gg", 0)
+            player:Attribute_SetIntValue("disable_gg", 0)
         end, "EnableGG", 0.45)
         local ent = EntIndexToHScript(info.entindex)
         local child = ent:GetChildren()[1]
@@ -407,10 +407,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                 end
             end
 
-            if GetMapName() == "a2_headcrabs_tunnel" and vlua.find(Entities:FindAllInSphere(Vector(347,-242,-63), 20), player) then
-                ClimbLadderSound()
-                SendToConsole("fadein 0.2")
-                SendToConsole("setpos_exact 347 -297 2")
+            if GetMapName() == "a2_headcrabs_tunnel" and vlua.find(Entities:FindAllInSphere(Vector(348, -252, -62), 10), player) then
+                ClimbLadder(22)
             end
 
             if GetMapName() == "a2_hideout" then
@@ -812,6 +810,7 @@ if GlobalSys:CommandLineCheck("-novr") then
                     "models/industrial/industrial_chemical_barrel_02.vmdl",
                     "models/props/barrel_plastic_1.vmdl",
                     "models/props/barrel_plastic_1_open.vmdl",
+                    "models/props_c17/oildrum001_explosive.vmdl",
                 }
                 ent = Entities:FindByClassname(nil, "prop_physics")
                 while ent do
@@ -847,6 +846,8 @@ if GlobalSys:CommandLineCheck("-novr") then
                 ent:SetThink(function()
                     local viewmodel = Entities:FindByClassname(nil, "viewmodel")
                     local player = Entities:GetLocalPlayer()
+
+                    cvar_setf("player_use_radius", min(2200/abs(player:GetAngles().x),60))
 
                     if move_delta ~= Vector(0, 0, 0) then
                         table.insert(unstuck_table, player:GetOrigin())
@@ -1244,7 +1245,6 @@ if GlobalSys:CommandLineCheck("-novr") then
                     if not loading_save_file then
                         ent = SpawnEntityFromTableSynchronous("env_message", {["message"]="CHAPTER3_TITLE"})
                         DoEntFireByInstanceHandle(ent, "ShowMessage", "", 0, nil, nil)
-						
                         ent = SpawnEntityFromTableSynchronous("prop_physics_override", {["targetname"]="shotgun_pickup_blocker", ["CollisionGroupOverride"]=5, ["renderamt"]=0, ["model"]="models/hacking/holo_hacking_sphere_prop.vmdl", ["origin"]="605.122 1397.567 -32.079", ["modelscale"]=2})
                         ent:SetParent(Entities:FindByName(nil, "12712_hanging_shotgun_zombie"), "hand_r")
                     end
@@ -1268,11 +1268,13 @@ if GlobalSys:CommandLineCheck("-novr") then
 					end
 
                     if GetMapName() == "a2_drainage" then
-                        SendToConsole("ent_fire wheel_socket SetScale 4")
-                        SendToConsole("ent_fire wheel2_socket SetScale 4")
-                        SendToConsole("ent_fire wheel_physics DisablePickup")
-                        ent = Entities:FindByClassnameNearest("npc_barnacle", Vector(941, -1666, 255), 10)
-                        DoEntFireByInstanceHandle(ent, "AddOutput", "OnRelease>wheel_physics>EnablePickup>>0>1", 0, nil, nil)
+                        if not loading_save_file then
+                            SendToConsole("ent_fire math_count_wheel2_installment addoutput \"OnChangedFromMin>relay_install_wheel2>Trigger>>0>1\"")
+                            SendToConsole("ent_fire math_count_wheel_installment addoutput \"OnChangedFromMin>relay_install_wheel>Trigger>>0>1\"")
+                            SendToConsole("ent_fire wheel_physics DisablePickup")
+                            ent = Entities:FindByClassnameNearest("npc_barnacle", Vector(941, -1666, 255), 10)
+                            DoEntFireByInstanceHandle(ent, "AddOutput", "OnRelease>wheel_physics>EnablePickup>>0>1", 0, nil, nil)
+                        end
                     elseif GetMapName() == "a2_train_yard" then
                         if not loading_save_file then
                             ent = SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["renderamt"]=0, ["model"]="models/props/industrial_door_1_40_92_white_temp.vmdl", ["origin"]="-1080 3200 -350", ["angles"]="0 12 0", ["modelscale"]=5, ["targetname"]="elipreventfall"})

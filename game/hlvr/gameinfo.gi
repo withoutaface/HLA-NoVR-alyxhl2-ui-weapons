@@ -27,6 +27,7 @@
 		//
 		SearchPaths
 		{
+      Game				alyxhl2_weapons
 			Game				novr_wristpockets
 			Game				novr
 			Game				hlvr
