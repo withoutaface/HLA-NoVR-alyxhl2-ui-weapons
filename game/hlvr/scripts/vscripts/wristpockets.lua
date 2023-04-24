@@ -29,11 +29,11 @@ local itemsUniqueStrings = { "<", ">"  }
 function WristPockets_StartupPreparations()
 	local text = Entities:FindByName(nil, "text_pocketslots")
 	if not text then
-		SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"255 220 0\" color2 \"0 0 0\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.1527 y -0.028 }")
+		SendToConsole("ent_create game_text { targetname text_pocketslots effect 0 spawnflags 1 color \"236 193 39\" color2 \"0 0 0\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 9999 x 0.1497 y -0.031 }")
 	end
 	local textEmpty = Entities:FindByName(nil, "text_pocketslots_empty")
 	if not textEmpty then
-		SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"255 220 0\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.1527 y -0.028 }")
+		SendToConsole("ent_create game_text { targetname text_pocketslots_empty effect 0 spawnflags 1 color \"236 193 39\" color2 \"92 107 192\" fadein 0 fadeout 0 channel 4 fxtime 0 holdtime 0 x 0.1497 y -0.031 }")
 	end -- game cannot display newly recreated game_text on map bootup, so keep it
 	-- and fade-in fx stops working, so disable it too
 
