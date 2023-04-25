@@ -16,8 +16,12 @@ if GlobalSys:CommandLineCheck("-novr") then
     player_hurt_ev = ListenToGameEvent('player_hurt', function(info)
         -- Hack to stop pausing the game on death
         if info.health == 0 then
-            SendToConsole("reload")
-            SendToConsole("r_drawvgui 0")
+			if isModActive then -- trick to avoid game crash on death during addon play
+				SendToConsole("load quick")
+			else
+				SendToConsole("reload")
+				SendToConsole("r_drawvgui 0")
+			end
         end
 
         -- Kill on fall damage
@@ -577,7 +581,7 @@ if GlobalSys:CommandLineCheck("-novr") then
 			end
 			if GetMapName() == "05_pleasantville" then 
 				if vlua.find(Entities:FindAllInSphere(Vector(905,-698,7790), 5), player) then -- 1
-					ClimbLadder(7895)
+					ClimbLadder(7900)
 				elseif vlua.find(Entities:FindAllInSphere(Vector(924,-698,7920), 10), player) then -- 1r
 					ClimbLadderSound() 
 					SendToConsole("fadein 0.2")
@@ -624,6 +628,12 @@ if GlobalSys:CommandLineCheck("-novr") then
 			if GetMapName() == "goldeneye64_damver051" then
 				if vlua.find(Entities:FindAllInSphere(Vector(-831,-138,121), 8), player) then -- 1
 					ClimbLadder(260)
+				end
+			end
+			-- Training Day
+			if GetMapName() == "training_day" then
+				if vlua.find(Entities:FindAllInSphere(Vector(263,-187,67), 8), player) then -- 1
+					ClimbLadder(160)
 				end
 			end
 			
@@ -1220,6 +1230,15 @@ if GlobalSys:CommandLineCheck("-novr") then
 					-- TODO replace all generic weapon items!
 					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(3987, 33, 539), 25)
 					ent:SetEntityName("novr_endhangar_switch")
+				elseif GetMapName() == "training_day" then
+					SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
+					if not loading_save_file then
+						SendToConsole("hlvr_addresources 30 0 0 0")
+						Entities:GetLocalPlayer():Attribute_SetIntValue("gravity_gloves", 0)
+					end
+					ent = Entities:FindByClassnameNearest("prop_animinteractable", Vector(-934, -1562, 71), 25)
+					ent:SetEntityName("novr_fence_switch")
+					-- TODO replace plastic boxes (prop_physics_interactive) by collidable variants
 				end
 
                 if GetMapName() == "a2_quarantine_entrance" then

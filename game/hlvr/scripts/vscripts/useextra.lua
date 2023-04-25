@@ -5,6 +5,8 @@ local class = thisEntity:GetClassname()
 local name = thisEntity:GetName()
 local model = thisEntity:GetModelName()
 local player = Entities:GetLocalPlayer()
+
+local isModActive = ModSupport_IsAddonMap(GetMapName())
 -- Mod support by Hypercycle
 
 if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
@@ -29,7 +31,15 @@ local toner_end_path
 -- example_toner_path = {"leads_to_this_junction", point1, point2, point3, ...}
 local toner_paths
 -- example_toner_junction = {type (0=straight, 1=right angle), "activated_toner_path_1", "activated_toner_path_2", "activated_toner_path_3", "activated_toner_path_4"}
+-- left, up ,right, down
 local toner_junctions
+
+local toner_path_color = {
+	r = 94, g = 172, b = 199, a = 255,
+}
+local toner_junction_color = {
+	r = 231, g = 150, b = 78, a = 255,
+}
 
 if map == "a2_quarantine_entrance" then
     toner_start_path = "toner_path_1"
@@ -49,10 +59,32 @@ if map == "a2_quarantine_entrance" then
         toner_junction_3 = {0, "toner_path_5", "", "toner_path_5", ""},
     }
 end
+-- Levitation toner puzzles
+-- TODO doesn't work yet
+if map == "02_notimelikenow" then
+    toner_start_path = "6061_toner_path_1"
+    toner_end_path = "6061_toner_path_2"
+
+    toner_paths = {
+        ["6061_toner_path_1"] = {"6061_toner_junction_1", 
+		Vector(-1237.11, -358.27, -699.75), Vector(-1237.11, -358.27, -697.37), -- from port to up
+		Vector(-1216.92, -354.34, -697.37), -- to junction 1
+		Vector(-1217.04, -354.43, -718.12), -- corner
+		Vector(-1237.94, -358.27, -718.12)}, -- to junction 2
+		["6061_toner_path_2"] = {"6061_toner_junction_2", 
+		Vector(-1237.94, -358.27, -718.12), Vector(-1237.97, -358.10, -747.01)}, -- down
+    }
+    
+    toner_junctions = {
+        ["6061_toner_junction_1"] = {1, "6061_toner_path_1", "6061_toner_path_1", "", ""},
+        ["6061_toner_junction_2"] = {1, "", "", "6061_toner_path_1", "6061_toner_path_2"},
+    }
+end
 
 function draw_toner_path(toner_path)
     for i = 3, #toner_path do
-        DebugDrawBox(Vector(0,0,0), toner_path[i - 1], toner_path[i], 255, 0, 0, 255, 10)
+		--DebugDrawBox(Vector(0,0,0), toner_path[i - 1], toner_path[i], toner_path_color.r, toner_path_color.g, toner_path_color.b, toner_path_color.a, 10)
+		DebugDrawLine(toner_path[i - 1], toner_path[i], toner_path_color.r, toner_path_color.g, toner_path_color.b, true, 10)
     end
 end
 
@@ -62,15 +94,15 @@ function draw_toner_junction(junction, center, angles)
     if type == 0 then
         local min = RotatePosition(Vector(0,0,0), angles, Vector(0,-5,-0.5))
         local max = RotatePosition(Vector(0,0,0), angles, Vector(0,5,0.5))
-        DebugDrawBox(center, min, max, 255, 0, 0, 255, 10)
+        DebugDrawBox(center, min, max, toner_junction_color.r, toner_junction_color.g, toner_junction_color.b, toner_junction_color.a, 10)
     elseif type == 1 then
         local min = RotatePosition(Vector(0,0,0), angles, Vector(0,-5,-0.5))
         local max = RotatePosition(Vector(0,0,0), angles, Vector(0,0,0.5))
-        DebugDrawBox(center, min, max, 255, 0, 0, 255, 10)
+        DebugDrawBox(center, min, max, toner_junction_color.r, toner_junction_color.g, toner_junction_color.b, toner_junction_color.a, 10)
 
         local min = RotatePosition(Vector(0,0,0), angles, Vector(0,-0.5,-0.5))
         local max = RotatePosition(Vector(0,0,0), angles, Vector(0,0.5,5))
-        DebugDrawBox(center, min, max, 255, 0, 0, 255, 10)
+        DebugDrawBox(center, min, max, toner_junction_color.r, toner_junction_color.g, toner_junction_color.b, toner_junction_color.a, 10)
     end
 end
 
@@ -134,7 +166,7 @@ function toggle_toner_junction()
     end
 end
 
-if class == "info_hlvr_toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+if not isModActive and class == "info_hlvr_toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     thisEntity:Attribute_SetIntValue("used", 1)
     DoEntFireByInstanceHandle(thisEntity, "OnPlugRotated", "", 0, nil, nil)
     DebugDrawClear()
@@ -1073,6 +1105,16 @@ if model == "models/weapons/vr_tripmine/tripmine.vmdl" then
 		ent:Attribute_SetIntValue("used", 1)
     end
 end	
+if class == "hlvr_weapon_energygun" and map ~= "a1_intro_world_2" then
+	SendToConsole("give weapon_pistol")
+	SendToConsole("ent_remove weapon_bugbait")
+	thisEntity:Kill()
+end
+if class == "item_hlvr_weapon_grabbity_glove" and map ~= "a1_intro_world_2" then
+	player:Attribute_SetIntValue("gravity_gloves", 1)
+	StartSoundEventFromPosition("Grabbity.HoverPing", player:EyePosition())
+	thisEntity:Kill()
+end
 -- Mod support for Extra-Ordinary Value
 if map == "youreawake" then
 	if name == "1931_headset" then 
@@ -1245,11 +1287,13 @@ if map == "04_hehungers" then
 	end
 end
 if map == "05_pleasantville" then
-	if name == "15708_mesh_combine_switch_box" then 
+	if name == "15708_mesh_combine_switch_box" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
 		SendToConsole("ent_fire_output 15708_switch_box_hack_plug OnHackSuccess")
 	end
 	if name == "15708_prop_button" then 
 		SendToConsole("ent_fire_output 15708_handpose_combine_switchbox_button_press OnHandPosed")
+		player:Attribute_SetIntValue("plug_lever", 1) -- workaround on current NoVR version, to allow player use crank switches later
 	end	
 	if name == "29473_button_pusher_prop" then -- PushWaterBottlesButton
         SendToConsole("ent_fire_output 29473_button_center_pusher onin")
@@ -1258,7 +1302,6 @@ if map == "05_pleasantville" then
 		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
         SendToConsole("ent_fire_output 29494_button_center_pusher onin")
     end
-	-- TODO broken with one of NoVR updates
 	if name == "32803_antlion_plug_crank_a" then
         SendToConsole("ent_fire_output 32803_antlion_plug_crank_a oncompletionc_forward")
     end
@@ -1463,6 +1506,34 @@ if map == "goldeneye64dampart2_ver052_master" then
 		SendToConsole("hidehud 4")
 		SendToConsole("ent_fire player_speedmod ModifySpeed 0")
 		SendToConsole("bind MOUSE1 \"\"")
+    end
+end
+if map == "training_day" then
+	-- station
+	if name == "1022_cshield_station_1" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		SendToConsole("ent_fire_output 1022_cshield_station_hack_plug OnHackSuccess")
+	end
+	if name == "1022_cshield_station_prop_button" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then 
+		thisEntity:Attribute_SetIntValue("used", 1)
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 1022_cshield_station_relay_button_pressed OnTrigger")
+	end	
+	if name == "1088_door_reset" then
+		SendToConsole("ent_fire_output 1088_relay_flip_switch ontrigger")
+    end
+	if name == "novr_fence_switch" then
+		SendToConsole("ent_fire_output novr_fence_switch oncompletiona")
+    end
+	-- map bug: two different entities named the same
+	if name == "1199_button_center" then
+		StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
+		SendToConsole("ent_fire_output 1199_relay_elevator_button_down ontrigger")
+		SendToConsole("ent_fire_output 1199_relay_elevator_button_no_power ontrigger")
+		ent = Entities:FindByName(nil, "final door")
+		DoEntFireByInstanceHandle(ent, "Unlock", "", 2, nil, nil)
+		ent = Entities:FindByName(nil, "template fonal room")
+		DoEntFireByInstanceHandle(ent, "ForceSpawn", "", 4, nil, nil)
     end
 end
 
