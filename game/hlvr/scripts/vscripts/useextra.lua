@@ -6,6 +6,9 @@ local name = thisEntity:GetName()
 local model = thisEntity:GetModelName()
 local player = Entities:GetLocalPlayer()
 
+local isModActive = ModSupport_IsAddonMap(GetMapName())
+-- Mod support by Hypercycle
+
 if not (vlua.find(name, "elev_anim_door") and thisEntity:GetVelocity() ~= Vector(0, 0, 0)) then
     if thisEntity:Attribute_GetIntValue("toggle", 0) == 0 then
         thisEntity:Attribute_SetIntValue("toggle", 1)
@@ -31,6 +34,13 @@ local toner_end_path
 local toner_paths
 -- example_toner_junction = {type (0=straight, 1=right angle, 2=two right angles, 3=static T), "activated_toner_path_1", "activated_toner_path_2", "activated_toner_path_3", "activated_toner_path_4"}
 local toner_junctions
+
+local toner_path_color = {
+	r = 94, g = 172, b = 199, a = 255,
+}
+local toner_junction_color = {
+	r = 231, g = 150, b = 78, a = 255,
+}
 
 if map == "a2_quarantine_entrance" then
     toner_start_path = "toner_path_1"
@@ -68,10 +78,32 @@ elseif map == "a2_headcrabs_tunnel" then
         --toner_junction_i = {0, "toner_path_8", "", "toner_path_8", ""},
     }
 end
+-- Levitation toner puzzles
+-- TODO doesn't work yet
+if map == "02_notimelikenow" then
+    toner_start_path = "6061_toner_path_1"
+    toner_end_path = "6061_toner_path_2"
+
+    toner_paths = {
+        ["6061_toner_path_1"] = {"6061_toner_junction_1", 
+		Vector(-1237.11, -358.27, -699.75), Vector(-1237.11, -358.27, -697.37), -- from port to up
+		Vector(-1216.92, -354.34, -697.37), -- to junction 1
+		Vector(-1217.04, -354.43, -718.12), -- corner
+		Vector(-1237.94, -358.27, -718.12)}, -- to junction 2
+		["6061_toner_path_2"] = {"6061_toner_junction_2", 
+		Vector(-1237.94, -358.27, -718.12), Vector(-1237.97, -358.10, -747.01)}, -- down
+    }
+    
+    toner_junctions = {
+        ["6061_toner_junction_1"] = {1, "6061_toner_path_1", "6061_toner_path_1", "", ""},
+        ["6061_toner_junction_2"] = {1, "", "", "6061_toner_path_1", "6061_toner_path_2"},
+    }
+end
 
 function draw_toner_path(toner_path)
     for i = 3, #toner_path do
-        DebugDrawLine(toner_path[i - 1], toner_path[i], 0, 0, 255, false, -1)
+        --DebugDrawLine(toner_path[i - 1], toner_path[i], 0, 0, 255, false, -1)
+		DebugDrawLine(toner_path[i - 1], toner_path[i], toner_path_color.r, toner_path_color.g, toner_path_color.b, false, -1)
     end
 end
 
@@ -189,7 +221,7 @@ function toggle_toner_junction()
     end
 end
 
-if class == "info_hlvr_toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+if not isModActive and class == "info_hlvr_toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     --thisEntity:Attribute_SetIntValue("used", 1)
     DoEntFireByInstanceHandle(thisEntity, "OnPlugRotated", "", 0, nil, nil)
     DebugDrawClear()
@@ -1216,6 +1248,8 @@ if class == "item_hlvr_headcrab_gland" then
     SendToConsole("ent_fire achievement_squeeze_heart FireEvent")
 end
 
+ModSupport_CheckUseObjectInteraction(thisEntity)
+
 if class == "baseanimating" and vlua.find(name, "Console") and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
     thisEntity:Attribute_SetIntValue("used", 1)
     SendToConsole("ent_fire_output *_console_hacking_plug OnHackSuccess")
@@ -1224,6 +1258,7 @@ if class == "baseanimating" and vlua.find(name, "Console") and thisEntity:Attrib
         DoEntFireByInstanceHandle(v, "DisablePickup", "", 0, player, nil)
     end
     SendToConsole("ent_fire 5325_3947_combine_console AddOutput OnTankAdded>item_hlvr_combine_console_tank>DisablePickup>>0>1")
+	SendToConsole("ent_fire 26976_combine_console AddOutput OnTankAdded>item_hlvr_combine_console_tank>DisablePickup>>0>1") -- Levitation mod
 end
 
 if class == "item_hlvr_grenade_xen" then
@@ -1311,13 +1346,21 @@ elseif class == "item_hlvr_clip_rapidfire" then
     viewmodel:RemoveEffects(32)
     thisEntity:Kill()
 elseif class == "item_hlvr_grenade_frag" then
+	local goesInPocket = true
     if thisEntity:GetSequence() == "vr_grenade_unarmed_idle" then
-        FireGameEvent("item_pickup", item_pickup_params)
-        StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
-        SendToConsole("give weapon_frag")
-        local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-        viewmodel:RemoveEffects(32)
-        thisEntity:Kill()
+		if goesInPocket then
+			-- player can hold 2 grenades on pockets, and one in hand
+			-- for now, all grenades will go straight into pockets
+			WristPockets_PickUpGrenade(player, thisEntity)
+			FireGameEvent("item_pickup", item_pickup_params)
+		else
+			FireGameEvent("item_pickup", item_pickup_params)
+			StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
+			SendToConsole("give weapon_frag")
+			local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+			viewmodel:RemoveEffects(32)
+			thisEntity:Kill()
+		end
     end
 elseif class == "item_healthvial" then
     if player:GetHealth() < player:GetMaxHealth() then
@@ -1328,5 +1371,8 @@ elseif class == "item_healthvial" then
         StartSoundEventFromPosition("HealthPen.Success01", player:EyePosition())
         StartSoundEventFromPosition("HealthPen.Success02", player:EyePosition())
         thisEntity:Kill()
+	else
+		WristPockets_PickUpHealthPen(player, thisEntity)
+		FireGameEvent("item_pickup", item_pickup_params)
     end
 end
