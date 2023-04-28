@@ -556,7 +556,7 @@ if GlobalSys:CommandLineCheck("-novr") then
             SendToConsole("bind " .. RELOAD .. " +reload")
             SendToConsole("bind " .. QUICK_SWAP .. " lastinv")
             SendToConsole("bind " .. COVER_MOUTH .. " +covermouth")
-            SendToConsole("bind " .. MOVE_FORWARD .. " +iv_forward")
+            SendToConsole("bind " .. MOVE_FORWARD .. " \"+iv_forward;wristpockets_mapchange\"")
             SendToConsole("bind " .. MOVE_BACK .. " +backfixed")
             SendToConsole("bind " .. MOVE_LEFT .. " +iv_left")
             SendToConsole("bind " .. MOVE_RIGHT .. " +iv_right")

@@ -2,9 +2,7 @@ require "storage"
 -- Fake Wrist Pockets, by Hypercycle
 
 -- bindings
-WPOCKETS_USE_HEALTHPEN = "Z"
-WPOCKETS_USE_GRENADE   = "X"
-WPOCKETS_DROPITEM      = "C"
+require "bindings"
 
 -- starts from 1
 local itemsClasses = { "item_healthvial", "item_hlvr_grenade_frag", "item_hlvr_prop_battery", "prop_physics", "item_hlvr_health_station_vial" } 
@@ -308,3 +306,13 @@ Convars:RegisterCommand("pocketslots_dropitem", function()
 		end 
 	end
 end, "Drop one item from pockets, if any exists", 0)
+
+local mapChangeWristPockets = false
+
+Convars:RegisterCommand("wristpockets_mapchange" , function()
+	if mapChangeWristPockets then return else
+		WristPockets_UpdateHUD()
+		mapChangeWristPockets = true
+		print("wristpockets - function wristpockets_mapchange executed")
+	end
+end, "function wristpockets_mapchange", 0)
