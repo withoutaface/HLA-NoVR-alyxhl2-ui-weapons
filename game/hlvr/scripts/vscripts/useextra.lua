@@ -808,10 +808,17 @@ if class == "prop_dynamic" then
             player:Attribute_SetIntValue("next_elevator_floor", 2)
         end
     elseif model == "models/props_combine/combine_doors/combine_door_sm01.vmdl" or model == "models/props_combine/combine_lockers/combine_locker_doors.vmdl" then
+		local isMultitoolEquip = true
+		local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+        if viewmodel and viewmodel:GetModelName() == "models/weapons/v_multitool.vmdl" then
+			isMultitoolEquip = true
+		end
+		
         local ent = Entities:FindByClassnameNearest("info_hlvr_holo_hacking_plug", thisEntity:GetCenter(), 40)
-
-        if ent and ent:Attribute_GetIntValue("used", 0) == 0 then
+		
+        if ent and isMultitoolEquip and ent:Attribute_GetIntValue("used", 0) == 0 then
 			ent:Attribute_SetIntValue("used", 1)
+			ent:FireOutput("OnHackStarted", nil, nil, nil, 0)
             DoEntFireByInstanceHandle(ent, "BeginHack", "", 0, nil, nil)
             DoEntFireByInstanceHandle(ent, "EndHack", "", 1.8, nil, nil)
             ent:FireOutput("OnHackSuccess", nil, nil, nil, 1.8)
@@ -1300,7 +1307,7 @@ if vlua.find(class, "item_hlvr_crafting_currency_") then
     end, "", 0.02)
 
     thisEntity:Kill()
-elseif class == "item_hlvr_clip_energygun" then
+elseif class == "item_hlvr_clip_energygun" or class == "item_hlvr_clip_generic_pistol" then
     FireGameEvent("item_pickup", item_pickup_params)
     if name == "pistol_clip_1" then
         SendToConsole("ent_remove weapon_bugbait")
@@ -1317,7 +1324,7 @@ elseif class == "item_hlvr_clip_energygun" then
     local viewmodel = Entities:FindByClassname(nil, "viewmodel")
     viewmodel:RemoveEffects(32)
     thisEntity:Kill()
-elseif class == "item_hlvr_clip_energygun_multiple" then
+elseif class == "item_hlvr_clip_energygun_multiple" or class == "item_hlvr_clip_generic_pistol_multiple" then
     FireGameEvent("item_pickup", item_pickup_params)
     SendToConsole("hlvr_addresources 40 0 0 0")
     StartSoundEventFromPosition("Inventory.DepositItem", player:EyePosition())
