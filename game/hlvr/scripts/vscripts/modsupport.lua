@@ -284,6 +284,17 @@ function ModSupport_CheckForLadderOrTeleport()
             SendToConsole("setpos_exact 2594.707 -1299.625 50")
         end
     end
+	if map == "zombies_part_5" then
+        if vlua.find(Entities:FindAllInSphere(Vector(-2246,-4260,175), 8), player) then -- 1
+            ClimbLadderSound()
+            SendToConsole("fadein 0.2")
+            SendToConsole("setpos_exact -2225.873 -4225.539 230")
+        elseif vlua.find(Entities:FindAllInSphere(Vector(-2236,-4240,255), 8), player) then -- 1r
+            ClimbLadderSound() 
+            SendToConsole("fadein 0.2")
+            SendToConsole("setpos_exact -2249.137 -4267.437 120")
+        end
+    end
 end
 
 --
@@ -760,7 +771,7 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             --StartSoundEventFromPosition("HackingPuzzle.TripmineSuccess", player:EyePosition())
         end
     end
-    if class == "hlvr_weapon_energygun" or class == "hlvr_weapon_generic_pistol" then
+    if class == "item_hlvr_weapon_energygun" or class == "item_hlvr_weapon_generic_pistol" then
 		if map ~= "a1_intro_world_2" then
 			SendToConsole("give weapon_pistol")
 			SendToConsole("ent_remove weapon_bugbait")
