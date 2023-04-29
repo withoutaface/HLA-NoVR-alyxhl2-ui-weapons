@@ -469,6 +469,8 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 	local player = Entities:GetLocalPlayer()
 	local map = GetMapName()
 	DoSafeMainMenuTrick()
+	local ent
+	local ent2
 	--
 	-- Addon: Extra-Ordinary Value
 	--
@@ -592,7 +594,7 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 		end
 		ent2 = Entities:FindByName(nil, "finish_relay")
 		if ent2 then
-			ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent)
+			ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent2)
 		end
 		if not ent and ent2 then -- vort powers is already given
 			GiveVortEnergy()
