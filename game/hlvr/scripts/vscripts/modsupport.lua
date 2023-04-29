@@ -431,10 +431,14 @@ function ModGoldenEyeDam1_ShowHintEnd(a, b)
     DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
 end
 
-function ModResidentAlyx_Lvl3BatteryInserted(a, b)
+function ModResidentAlyx_Lvl3Battery1Inserted(a, b)
     local player = Entities:GetLocalPlayer()
-    local batteryCount = player:Attribute_GetIntValue("novr_zp3_batteries", 0)
-    player:Attribute_SetIntValue("novr_zp3_batteries", batteryCount + 1)
+    player:Attribute_SetIntValue("novr_zp3_battery1ready", 1)
+end
+
+function ModResidentAlyx_Lvl3Battery2Inserted(a, b)
+    local player = Entities:GetLocalPlayer()
+    player:Attribute_SetIntValue("novr_zp3_battery2ready", 1)
 end
 
 function ModResidentAlyx_Lvl4AllowToDetonateBarrels(a, b)
@@ -701,9 +705,9 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 			SendToConsole("ent_fire 16241_powered_door_lock_bar lock")
 		end
 		ent = Entities:FindByName(nil, "14990_powerunit_relay_battery_inserted")
-		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3BatteryInserted", ent)
+		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3Battery1Inserted", ent)
 		ent = Entities:FindByName(nil, "12228_powerunit_relay_battery_inserted")
-		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3BatteryInserted", ent)
+		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3Battery2Inserted", ent)
 	elseif map == "zombies_part_4" then
 		SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 		ent = Entities:FindByName(nil, "15911_relay_unlock_controls")
@@ -1227,13 +1231,14 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
 			StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 15529_handpose_combine_switchbox_button_press OnHandPosed") -- in fact it must power on crafting station, but due to NoVR script constant updates, will left it as it is
         end
-        -- two batteries lock set
-        if name == "12270_mesh_combine_switch_box" and player:Attribute_GetIntValue("novr_zp3_batteries", 0) == 2 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+        -- two batteries lock set, since battery object can trigger up to 8 times at once (!!!) I will check them like this
+        if name == "12270_mesh_combine_switch_box" and player:Attribute_GetIntValue("novr_zp3_battery1ready", 0) == 1 and player:Attribute_GetIntValue("novr_zp3_battery2ready", 0) == 1 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
             SendToConsole("ent_fire_output 12270_switch_box_hack_plug OnHackSuccess")
         end
-        if name == "12270_prop_button" and player:Attribute_GetIntValue("novr_zp3_batteries", 0) == 2 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+        if name == "12270_prop_button" and player:Attribute_GetIntValue("novr_zp3_battery1ready", 0) == 1 and player:Attribute_GetIntValue("novr_zp3_battery2ready", 0) == 1 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
+			StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 12270_handpose_combine_switchbox_button_press OnHandPosed")
         end
     end
