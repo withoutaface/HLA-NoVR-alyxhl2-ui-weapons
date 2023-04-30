@@ -1001,6 +1001,7 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 28212_button_center_pusher onin")
         end
+		-- TODO broken with one of NoVR updates, and game crashes when you activate the last junction
         if name == "toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
             SendToConsole("ent_fire_output toner_port_plug OnHackSuccess")
@@ -1009,7 +1010,8 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             SendToConsole("ent_fire_output toner_path_6 onpoweron")
             SendToConsole("ent_fire_output toner_path_9 onpoweron")
         end
-        if name == "movelever" and Entities:FindByName(nil, "toner_port"):Attribute_GetIntValue("used", 0) == 1 then
+        --if name == "movelever" and Entities:FindByName(nil, "toner_port"):Attribute_GetIntValue("used", 0) == 1 then
+		if name == "movelever" then
             SendToConsole("ent_fire_output movelever oncompletiona")
         end
     end
