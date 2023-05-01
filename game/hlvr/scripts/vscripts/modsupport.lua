@@ -284,6 +284,176 @@ function ModSupport_CheckForLadderOrTeleport()
             SendToConsole("setpos_exact 2594.707 -1299.625 50")
         end
     end
+	if map == "zombies_part_5" then
+        if vlua.find(Entities:FindAllInSphere(Vector(-2246,-4260,175), 8), player) then -- 1
+            ClimbLadderSound()
+            SendToConsole("fadein 0.2")
+            SendToConsole("setpos_exact -2225.873 -4225.539 230")
+        elseif vlua.find(Entities:FindAllInSphere(Vector(-2236,-4240,255), 8), player) then -- 1r
+            ClimbLadderSound() 
+            SendToConsole("fadein 0.2")
+            SendToConsole("setpos_exact -2249.137 -4267.437 120")
+        end
+    end
+end
+
+--
+-- Addon-specific script functions
+--
+
+function ModCommon_ShowFlashlightTutorial()
+    SendToConsole("ent_fire text_flashlight ShowMessage")
+    SendToConsole("play play sounds/ui/beepclear.vsnd")
+end
+
+function ModCommon_DisablePlayerActions(a, b)
+    SendToConsole("r_drawviewmodel 0")
+    SendToConsole("hidehud 4")
+    SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+    SendToConsole("bind MOUSE1 \"\"")
+end
+
+function ModBelomorskaya_EquipFlare(a, b) -- TODO works bad
+    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
+    local viewmodel_ang = viewmodel:GetAngles()
+    local viewmodel_pos = viewmodel:GetAbsOrigin()
+
+    ent = Entities:FindByName(nil, "flare_01")
+    if ent then
+        ent:SetOrigin(Vector(viewmodel_pos.x + 35, viewmodel_pos.y + 35, viewmodel_pos.z + 35))
+        ent:SetAngles(viewmodel_ang.x, viewmodel_ang.y + 180, viewmodel_ang.z)
+    end
+    DoEntFireByInstanceHandle(ent, "SetParent", "!player", 0, nil, nil)
+    ent = Entities:FindByName(nil, "flare_trigger_01")
+    if ent then
+        ent:Kill()
+    end
+end
+
+function ModBelomorskaya_RemoveFlare(a, b)
+    ent = Entities:FindByName(nil, "flare_01")
+    if ent then
+        ent:Kill()
+    end
+end
+
+function ModLevitation_AllowMovement(a, b)
+    SendToConsole("ent_fire player_speedmod ModifySpeed 1")
+end
+
+function ModLevitation_SpawnWorkaroundBottlesForJeff()
+    SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4415.675 -151"})
+    SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4410.675 -151"})
+end
+
+function ModLevitation_Map5SpawnWorkaroundJumpStructure()
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/tanks/vertical_tank.vmdl", ["origin"]="685.276 -701.073 7780", ["angles"]="0 0 0"})
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7720", ["angles"]="0 0 0", ["skin"]=2})
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7723", ["angles"]="0 0 180", ["skin"]=2})
+end
+
+function ModLevitation_Map6EndingTransition(a, b)
+    SendToConsole("r_drawviewmodel 0")
+    SendToConsole("hidehud 4")
+    SendToConsole("bind MOUSE1 \"\"")
+end
+
+function ModLevitation_Map7SpawnWorkaroundBattery()
+    SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery", ["solid"]=6, ["origin"]="1121.042 -530.784 344"})
+end
+
+function ModLevitation_Map7SpawnWorkaroundBattery2()
+    SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery2", ["solid"]=6, ["origin"]="-666.762 493.066 -439.9"})
+end
+
+function ModLevitation_Map7SpawnWorkaroundJumpStructure()
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-264.164 -1015.459 486", ["angles"]="0 0 0", ["skin"]=0})
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-268.164 -1015.459 518.5", ["angles"]="0 21 0", ["skin"]=0})
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-270.164 -1015.459 551", ["angles"]="0 7 0", ["skin"]=0})
+    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-272.164 -1015.459 583.5", ["angles"]="0 -12 0", ["skin"]=0})
+end
+
+function ModLevitation_Map7EnterCombineTrap()
+    SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_smg1;ent_remove weapon_frag")
+    SendToConsole("r_drawviewmodel 0")
+end
+
+function ModLevitation_RemoveVortPowers(a, b)
+    SendToConsole("bind MOUSE1 \"\"")
+end
+
+function ModLevitation_Map8FinaleStopMove(a, b)
+    SendToConsole("hidehud 4")
+    SendToConsole("ent_fire player_speedmod ModifySpeed 0")
+end
+
+-- music is supposed to be played, but it's resource file broken even in VR
+function ModGoldenEyeDam1_PlayReplacementAmbient(a, b)
+    StartSoundEventFromPosition("Ambient.WindSystem", Entities:GetLocalPlayer():EyePosition())
+end
+
+function ModGoldenEyeDam1_ShowHintIntro(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "This is where your mission begins, Agent Alyx Bond.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "SetText", "Objective 1: Find the remote access button to the guard tower bunker.", 4, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 4, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintObj2(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Objective 2: Enter the bunker and shut down the main power grid.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintObj3(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Objective 3: Reach the top of the tower and find the switch to the tunnel doors.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintObj4(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Objective 4: Enter the tunnel and get to the dam.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintTripmines(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Tip: Place the hoppers down as trip mines to set traps for your enemies.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintEasterEggRoom(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "You have opened the Secret Room.", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintEasterEgg(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Tip: GET OUT OF MY ROOM!", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModGoldenEyeDam1_ShowHintEnd(a, b)
+    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
+    DoEntFireByInstanceHandle(ent, "SetText", "Congratulations for beating the level (Insert Playtester Name Here)!", 0, nil, nil)
+    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
+end
+
+function ModResidentAlyx_Lvl3Battery1Inserted(a, b)
+    local player = Entities:GetLocalPlayer()
+    player:Attribute_SetIntValue("novr_zp3_battery1ready", 1)
+end
+
+function ModResidentAlyx_Lvl3Battery2Inserted(a, b)
+    local player = Entities:GetLocalPlayer()
+    player:Attribute_SetIntValue("novr_zp3_battery2ready", 1)
+end
+
+function ModResidentAlyx_Lvl4AllowToDetonateBarrels(a, b)
+    Entities:GetLocalPlayer():Attribute_SetIntValue("plug_lever", 1) -- workaround on current NoVR version, to allow player use crank switches later
 end
 
 -- this trick allows to avoid game crash during Main Menu loading, by keeping current loaded addons
@@ -299,6 +469,8 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 	local player = Entities:GetLocalPlayer()
 	local map = GetMapName()
 	DoSafeMainMenuTrick()
+	local ent
+	local ent2
 	--
 	-- Addon: Extra-Ordinary Value
 	--
@@ -422,7 +594,7 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 		end
 		ent2 = Entities:FindByName(nil, "finish_relay")
 		if ent2 then
-			ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent)
+			ent2:RedirectOutput("OnTrigger", "ModLevitation_RemoveVortPowers", ent2)
 		end
 		if not ent and ent2 then -- vort powers is already given
 			GiveVortEnergy()
@@ -542,11 +714,13 @@ function ModSupport_MapBootupScripts(isSaveLoaded)
 		SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 		if not isSaveLoaded then
 			SendToConsole("setpos_exact 4830.8001 -987.892 55")
+			-- fence doors is not locked for HL2 char
+			SendToConsole("ent_fire 16241_powered_door_lock_bar lock")
 		end
 		ent = Entities:FindByName(nil, "14990_powerunit_relay_battery_inserted")
-		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3BatteryInserted", ent)
+		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3Battery1Inserted", ent)
 		ent = Entities:FindByName(nil, "12228_powerunit_relay_battery_inserted")
-		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3BatteryInserted", ent)
+		ent:RedirectOutput("OnTrigger", "ModResidentAlyx_Lvl3Battery2Inserted", ent)
 	elseif map == "zombies_part_4" then
 		SendToConsole("bind " .. FLASHLIGHT .. " inv_flashlight")
 		ent = Entities:FindByName(nil, "15911_relay_unlock_controls")
@@ -599,10 +773,12 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             --StartSoundEventFromPosition("HackingPuzzle.TripmineSuccess", player:EyePosition())
         end
     end
-    if class == "hlvr_weapon_energygun" and map ~= "a1_intro_world_2" then
-        SendToConsole("give weapon_pistol")
-        SendToConsole("ent_remove weapon_bugbait")
-        thisEntity:Kill()
+    if class == "item_hlvr_weapon_energygun" or class == "item_hlvr_weapon_generic_pistol" then
+		if map ~= "a1_intro_world_2" then
+			SendToConsole("give weapon_pistol")
+			SendToConsole("ent_remove weapon_bugbait")
+			thisEntity:Kill()
+		end
     end
     if class == "item_hlvr_weapon_grabbity_glove" and map ~= "a1_intro_world_2" then
         player:Attribute_SetIntValue("gravity_gloves", 1)
@@ -765,9 +941,6 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
         end
     end
     if map == "04_hehungers" then
-        if name == "23711_combine_locker" or name == "23711_locker_hack_plug" then
-            SendToConsole("ent_fire_output 23711_locker_hack_plug OnHackStarted") -- zombie awake
-        end
         if name == "power_stake_1_start" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
             SendToConsole("ent_fire_output toner_port_plug OnHackSuccess")
@@ -828,6 +1001,7 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 28212_button_center_pusher onin")
         end
+		-- TODO broken with one of NoVR updates, and game crashes when you activate the last junction
         if name == "toner_port" and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
             SendToConsole("ent_fire_output toner_port_plug OnHackSuccess")
@@ -836,7 +1010,8 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             SendToConsole("ent_fire_output toner_path_6 onpoweron")
             SendToConsole("ent_fire_output toner_path_9 onpoweron")
         end
-        if name == "movelever" and Entities:FindByName(nil, "toner_port"):Attribute_GetIntValue("used", 0) == 1 then
+        --if name == "movelever" and Entities:FindByName(nil, "toner_port"):Attribute_GetIntValue("used", 0) == 1 then
+		if name == "movelever" then
             SendToConsole("ent_fire_output movelever oncompletiona")
         end
     end
@@ -1048,11 +1223,12 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
 	--
     if map == "zombies_part_3" then
         if name == "16241_door_reset" then
-            SendToConsole("ent_fire_output 16241_door_reset OnCompletionA_Forward")
+            SendToConsole("ent_fire 16241_powered_door_lock_bar unlock")
+			SendToConsole("ent_fire_output 16241_door_reset OnCompletionA_Forward")
         end
         -- garage plugs set
-        if vlua.find(Entities:FindAllInSphere(Vector(3843,726,55), 20), player) then
-            local ent = Entities:FindByNameNearest("391_locker_hack_plug", thisEntity:GetCenter(), 20)
+        if vlua.find(Entities:FindAllInSphere(Vector(3835,725,65), 20), player) then
+            local ent = Entities:FindByNameNearest("391_locker_hack_plug", player:GetCenter(), 20)
             if ent and player:Attribute_GetIntValue("novr_zp3_391plug_used", 0) == 0 then
                 player:Attribute_SetIntValue("novr_zp3_391plug_used", 1)
                 ent:FireOutput("OnHackStarted", nil, nil, nil, 0)
@@ -1067,15 +1243,17 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
         end
         if name == "15529_prop_button" and player:Attribute_GetIntValue("novr_zp3_391plug_used", 0) == 1 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
+			StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 15529_handpose_combine_switchbox_button_press OnHandPosed") -- in fact it must power on crafting station, but due to NoVR script constant updates, will left it as it is
         end
-        -- two batteries lock set
-        if name == "12270_mesh_combine_switch_box" and player:Attribute_GetIntValue("novr_zp3_batteries", 0) == 2 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+        -- two batteries lock set, since battery object can trigger up to 8 times at once (!!!) I will check them like this
+        if name == "12270_mesh_combine_switch_box" and player:Attribute_GetIntValue("novr_zp3_battery1ready", 0) == 1 and player:Attribute_GetIntValue("novr_zp3_battery2ready", 0) == 1 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
             SendToConsole("ent_fire_output 12270_switch_box_hack_plug OnHackSuccess")
         end
-        if name == "12270_prop_button" and player:Attribute_GetIntValue("novr_zp3_batteries", 0) == 2 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
+        if name == "12270_prop_button" and player:Attribute_GetIntValue("novr_zp3_battery1ready", 0) == 1 and player:Attribute_GetIntValue("novr_zp3_battery2ready", 0) == 1 and thisEntity:Attribute_GetIntValue("used", 0) == 0 then
             thisEntity:Attribute_SetIntValue("used", 1)
+			StartSoundEventFromPosition("Button_Basic.Press", player:EyePosition())
             SendToConsole("ent_fire_output 12270_handpose_combine_switchbox_button_press OnHandPosed")
         end
     end
@@ -1084,161 +1262,6 @@ function ModSupport_CheckUseObjectInteraction(thisEntity)
             SendToConsole("ent_fire_output 15911_antlion_plug_crank_a oncompletionc_forward")
         end
     end
-end
-
---
--- Addon-specific script functions
---
-
-local function ModCommon_ShowFlashlightTutorial()
-    SendToConsole("ent_fire text_flashlight ShowMessage")
-    SendToConsole("play play sounds/ui/beepclear.vsnd")
-end
-
-local function ModCommon_DisablePlayerActions(a, b)
-    SendToConsole("r_drawviewmodel 0")
-    SendToConsole("hidehud 4")
-    SendToConsole("ent_fire player_speedmod ModifySpeed 0")
-    SendToConsole("bind MOUSE1 \"\"")
-end
-
-local function ModBelomorskaya_EquipFlare(a, b) -- TODO works bad
-    local viewmodel = Entities:FindByClassname(nil, "viewmodel")
-    local viewmodel_ang = viewmodel:GetAngles()
-    local viewmodel_pos = viewmodel:GetAbsOrigin()
-
-    ent = Entities:FindByName(nil, "flare_01")
-    if ent then
-        ent:SetOrigin(Vector(viewmodel_pos.x + 35, viewmodel_pos.y + 35, viewmodel_pos.z + 35))
-        ent:SetAngles(viewmodel_ang.x, viewmodel_ang.y + 180, viewmodel_ang.z)
-    end
-    DoEntFireByInstanceHandle(ent, "SetParent", "!player", 0, nil, nil)
-    ent = Entities:FindByName(nil, "flare_trigger_01")
-    if ent then
-        ent:Kill()
-    end
-end
-
-local function ModBelomorskaya_RemoveFlare(a, b)
-    ent = Entities:FindByName(nil, "flare_01")
-    if ent then
-        ent:Kill()
-    end
-end
-
-local function ModLevitation_AllowMovement(a, b)
-    SendToConsole("ent_fire player_speedmod ModifySpeed 1")
-end
-
-local function ModLevitation_SpawnWorkaroundBottlesForJeff()
-    SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4415.675 -151"})
-    SpawnEntityFromTableSynchronous("prop_physics", {["solid"]=6, ["model"]="models/props/beer_bottle_1.vmdl", ["origin"]="-102.158 -4410.675 -151"})
-end
-
-local function ModLevitation_Map5SpawnWorkaroundJumpStructure()
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/tanks/vertical_tank.vmdl", ["origin"]="685.276 -701.073 7780", ["angles"]="0 0 0"})
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7720", ["angles"]="0 0 0", ["skin"]=2})
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["model"]="models/props/industrial_small_tank_1.vmdl", ["origin"]="685.276 -701.073 7723", ["angles"]="0 0 180", ["skin"]=2})
-end
-
-local function ModLevitation_Map6EndingTransition(a, b)
-    SendToConsole("r_drawviewmodel 0")
-    SendToConsole("hidehud 4")
-    SendToConsole("bind MOUSE1 \"\"")
-end
-
-local function ModLevitation_Map7SpawnWorkaroundBattery()
-    SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery", ["solid"]=6, ["origin"]="1121.042 -530.784 344"})
-end
-
-local function ModLevitation_Map7SpawnWorkaroundBattery2()
-    SpawnEntityFromTableSynchronous("item_hlvr_prop_battery", {["targetname"]="novr_workaround_battery2", ["solid"]=6, ["origin"]="-666.762 493.066 -439.9"})
-end
-
-local function ModLevitation_Map7SpawnWorkaroundJumpStructure()
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-264.164 -1015.459 486", ["angles"]="0 0 0", ["skin"]=0})
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-268.164 -1015.459 518.5", ["angles"]="0 21 0", ["skin"]=0})
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-270.164 -1015.459 551", ["angles"]="0 7 0", ["skin"]=0})
-    SpawnEntityFromTableSynchronous("prop_dynamic", {["solid"]=6, ["alpha"]=0, ["model"]="models/props/plastic_container_1.vmdl", ["origin"]="-272.164 -1015.459 583.5", ["angles"]="0 -12 0", ["skin"]=0})
-end
-
-local function ModLevitation_Map7EnterCombineTrap()
-    SendToConsole("ent_remove weapon_pistol;ent_remove weapon_shotgun;ent_remove weapon_smg1;ent_remove weapon_frag")
-    SendToConsole("r_drawviewmodel 0")
-end
-
-local function ModLevitation_RemoveVortPowers(a, b)
-    SendToConsole("bind MOUSE1 \"\"")
-end
-
-local function ModLevitation_Map8FinaleStopMove(a, b)
-    SendToConsole("hidehud 4")
-    SendToConsole("ent_fire player_speedmod ModifySpeed 0")
-end
-
--- music is supposed to be played, but it's resource file broken even in VR
-local function ModGoldenEyeDam1_PlayReplacementAmbient(a, b)
-    StartSoundEventFromPosition("Ambient.WindSystem", Entities:GetLocalPlayer():EyePosition())
-end
-
-local function ModGoldenEyeDam1_ShowHintIntro(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "This is where your mission begins, Agent Alyx Bond.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "SetText", "Objective 1: Find the remote access button to the guard tower bunker.", 4, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 4, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintObj2(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Objective 2: Enter the bunker and shut down the main power grid.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintObj3(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Objective 3: Reach the top of the tower and find the switch to the tunnel doors.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintObj4(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Objective 4: Enter the tunnel and get to the dam.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintTripmines(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Tip: Place the hoppers down as trip mines to set traps for your enemies.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintEasterEggRoom(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "You have opened the Secret Room.", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintEasterEgg(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Tip: GET OUT OF MY ROOM!", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModGoldenEyeDam1_ShowHintEnd(a, b)
-    ent = SpawnEntityFromTableSynchronous("game_text", {["effect"]=2, ["spawnflags"]=1, ["color"]="230 230 230", ["color2"]="0 0 0", ["fadein"]=0, ["fadeout"]=0.15, ["fxtime"]=0.25, ["holdtime"]=4, ["x"]=-1, ["y"]=0.6})
-    DoEntFireByInstanceHandle(ent, "SetText", "Congratulations for beating the level (Insert Playtester Name Here)!", 0, nil, nil)
-    DoEntFireByInstanceHandle(ent, "Display", "", 0, nil, nil)
-end
-
-local function ModResidentAlyx_Lvl3BatteryInserted(a, b)
-    local player = Entities:GetLocalPlayer()
-    local batteryCount = player:Attribute_GetIntValue("novr_zp3_batteries", 0)
-    player:Attribute_SetIntValue("novr_zp3_batteries", batteryCount + 1)
-end
-
-local function ModResidentAlyx_Lvl4AllowToDetonateBarrels(a, b)
-    Entities:GetLocalPlayer():Attribute_SetIntValue("plug_lever", 1) -- workaround on current NoVR version, to allow player use crank switches later
 end
 
 if isModActive then
