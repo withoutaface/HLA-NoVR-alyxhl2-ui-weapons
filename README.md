@@ -1,3 +1,11 @@
+# HLA-NoVR alyxhl2-ui-weapons
+I'm part of the novr mod team and use this repository for development and contributing to the project.
+Most of my work is already merged to the [upstream](https://github.com/bfeber/HLA-NoVR) repository.
+
+For mod support use this branch: [branch - mod_support](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-weapons/tree/mod_support)
+(based on [Hypercycle](https://github.com/VladManyanov/HLA-NOVR-Mods) amazing work)
+There is also a branch containing my classic hl2 based viewmodels: [branch - classic](https://github.com/withoutaface/HLA-NoVR-alyxhl2-ui-weapons/tree/classic)
+
 # HLA-NoVR
 NoVR Script for Half-Life: Alyx
 
